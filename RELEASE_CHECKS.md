@@ -20,6 +20,13 @@
 - This is a browser-local prototype. No family authentication, cloud sync, parent dashboard or imported-record migration.
 - No Vercel account connection or production deployment performed by configuration alone.
 - Tests do not certify coaching suitability, every video playback, mobile Safari, offline installation, or cross-device storage.
-- Strength plans remain single-set technique sessions, not a complete progressive training program.
+- Strength plans support the existing one/two-set setting; a complete progressive training program is still pending.
 - Browser verification was on the development preview; recorded test sessions are not user workout records and are not included in source.
 - GitHub CI requires its first hosted run to confirm workflow permissions. Branch protections must be configured separately.
+
+## Strength card redesign
+- Original Galaxy-style exercise deck with a two-position diagram for every exercise, video link, set/rep/rest stats and short technique cue.
+- Browse with swipe, arrow keys, numbered navigation or Previous/Next; browsing never records exercise completion.
+- Per-set and per-side checks, undo, persisted partial progress, and existing one/two-set setting respected. Existing completed sessions remain complete.
+- Automated checks cover deck navigation, one/two-set tracking, left/right sides, resume, undo, all nine exercise illustrations, completion and player separation.
+- Browser checked card rendering, left/right completion and next-card navigation. Touch gesture hardware and mobile Safari remain unverified.
