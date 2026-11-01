@@ -30,3 +30,9 @@
 - Per-set and per-side checks, undo, persisted partial progress, and existing one/two-set setting respected. Existing completed sessions remain complete.
 - Automated checks cover deck navigation, one/two-set tracking, left/right sides, resume, undo, all nine exercise illustrations, completion and player separation.
 - Browser checked card rendering, left/right completion and next-card navigation. Touch gesture hardware and mobile Safari remain unverified.
+
+## Illustration and palette rework
+- Replaced freehand pose coordinates with joint-based figures using fixed torso, upper/lower arm and thigh/shin lengths.
+- Added geometry assertions across all 18 poses; corrected split-squat knee direction and floor clearance.
+- Stronger purple/blue artwork, black frames, white figures and surfaces, and blue progress accents.
+- Existing functional regression suite passes. New browser visual review was blocked by preview-browser access; geometry tests are not professional anatomical certification.

@@ -33,3 +33,6 @@ click({liftSession:'B'});click({liftReady:''});click({runClock:'60'});assert.ok(
 assert.equal(run('Object.keys(liftArt).length'),9);
 for(const workout of ['A','B'])for(let i=0;i<5;i++){run("day='"+workout+"';exerciseIndex="+i+";liftSession()");assert.ok(run('hub.innerHTML').includes('<svg'));assert.ok(!run('hub.innerHTML').includes('undefined'))}
 console.log('PASS: card browsing, per-set/per-side checks, two-set plan, partial resume, undo, completion, legacy records, player isolation, diagram coverage, timer cleanup.');
+// Geometry invariants catch the prior stretching-limb regression.
+run(`for(const [name,art] of Object.entries(liftArt)){for(const p of art.rigs){const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);if(Math.abs(dist(p.hip,p.shoulder)-38)>0.001)throw Error(name+' torso');for(const [limbs,len] of [[p.arms,24],[p.legs,32]])for(const limb of limbs)for(let i=0;i<2;i++)if(Math.abs(dist(limb[i],limb[i+1])-len)>0.001)throw Error(name+' limb length');for(const q of [p.head,p.hip,p.shoulder,...p.arms.flat(),...p.legs.flat()])if(!q.every(Number.isFinite)||q[1]>159)throw Error(name+' invalid joint')}}`);
+console.log('PASS: all 18 poses retain fixed torso and limb lengths; joints remain above the floor.');
