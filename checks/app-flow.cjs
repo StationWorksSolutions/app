@@ -6,19 +6,19 @@ const old={names:['Player 1','Player 2'],sets:[1,1],records:{'0|2026-10-19|A':{c
 const ctx={document:{body:el(),head:el(),createElement:el,getElementById:id=>nodes[id]??=el(),querySelector:()=>el(),querySelectorAll:()=>[],addEventListener:(event,f,capture)=>listeners.push({event,f,capture})},window:{scrollTo(){}},localStorage:{getItem:()=>JSON.stringify(old),setItem:(k,v)=>stored=v},location:{search:'',href:'https://example.com'},history:{replaceState(){}},navigator:{},URL,URLSearchParams,Date,Blob,setTimeout(){},setInterval(f){tick=f;return 1},clearInterval(){tick=null}};
 vm.createContext(ctx);const html=fs.readFileSync('dist/index.html','utf8');vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1],ctx);for(const [,file]of html.matchAll(/<script src="([^"]+)"/g))vm.runInContext(fs.readFileSync('dist/'+file,'utf8'),ctx,{filename:file});
 const run=s=>vm.runInContext(s,ctx);
-assert.equal(run('lessons.length'),22);
-assert.equal(new Set(run('lessons.map(l=>l.id)')).size,22);
+assert.equal(run('lessons.length'),36);
+assert.equal(new Set(run('lessons.map(l=>l.id)')).size,36);
 run(`for(const l of lessons){for(const f of ['why','solo','duo','scenario','answer','evidence'])if(!l[f])throw Error(l.id+' missing '+f);for(const id of l.video)if(!demoCatalog[id].url.startsWith('https:'))throw Error('Invalid link '+id)}`);
-run("showHub('Today')");assert.ok(run('hub.innerHTML').includes('Control & stability'));assert.ok(!/Monday|Wednesday|Friday/.test(run('hub.innerHTML')));
-run("showHub('Learn')");assert.ok(run('hub.innerHTML').includes('22 lessons'));
+run("showHub('Today')");assert.ok(run('hub.innerHTML').includes('Full-Body Strength'));assert.ok(!/Monday|Wednesday|Friday/.test(run('hub.innerHTML')));
+run("showHub('Learn')");assert.ok(run('hub.innerHTML').includes('36 CONCEPT CARDS'));
 run("day='A';sessionKey='0|test|A';exerciseIndex=0;liftSession()");assert.ok(run('hub.innerHTML').includes('Squat to a chair'));assert.ok(!run('hub.innerHTML').includes('<h1>Dumbbell floor press</h1>'));
 for(let i=0;i<5;i++){run('exerciseIndex='+i+';liftSession()');assert.ok(!run('hub.innerHTML').includes('undefined'))}
 run("day='B';sessionKey='1|test|B';player=1");for(let i=0;i<5;i++){run('exerciseIndex='+i+';liftSession()');assert.ok(!run('hub.innerHTML').includes('undefined'))}
 assert.equal(run("data.records['0|2026-10-19|A'].weights[0]"),5);
 assert.ok(run("data.trainingSessions['0|test|A']!==data.trainingSessions['1|test|B']"));
-console.log('PASS: all scripts boot; 22 unique complete lessons; valid demo URL construction; schedule-free entry; one exercise at a time; both strength sessions render; old records preserved; player sessions separate. DOM mock only, not browser QA.');
+console.log('PASS: all scripts boot; 36 unique complete lessons; valid demo URL construction; schedule-free entry; one exercise at a time; both strength sessions render; old records preserved; player sessions separate. DOM mock only, not browser QA.');
 // Real card event handlers: browsing must never imply completion.
-const click=d=>{ctx.testEvent={target:{closest:()=>({dataset:d})}};listeners.filter(x=>x.event==='click').at(-1).f(ctx.testEvent)};
+const click=d=>{ctx.testEvent={target:{closest:()=>({dataset:d})}};listeners.find(x=>x.event==='click'&&x.f.toString().includes('d.cardDone')).f(ctx.testEvent)};
 run("player=0;data.sets[0]=2");click({liftSession:'A'});click({liftReady:''});
 click({cardStep:'1'});assert.equal(run('exerciseIndex'),1);assert.equal(run('cardRecord().completed.length'),0);
 click({cardStep:'-1'});click({cardDone:''});assert.equal(run('cardRecord().completed.length'),0,'Two sets required');
@@ -36,3 +36,15 @@ console.log('PASS: card browsing, per-set/per-side checks, two-set plan, partial
 // Geometry invariants catch the prior stretching-limb regression.
 run(`for(const [name,art] of Object.entries(liftArt)){for(const p of art.rigs){const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);if(Math.abs(dist(p.hip,p.shoulder)-38)>0.001)throw Error(name+' torso');for(const [limbs,len] of [[p.arms,24],[p.legs,32]])for(const limb of limbs)for(let i=0;i<2;i++)if(Math.abs(dist(limb[i],limb[i+1])-len)>0.001)throw Error(name+' limb length');for(const q of [p.head,p.hip,p.shoulder,...p.arms.flat(),...p.legs.flat()])if(!q.every(Number.isFinite)||q[1]>159)throw Error(name+' invalid joint')}}`);
 console.log('PASS: all 18 poses retain fixed torso and limb lengths; joints remain above the floor.');
+
+assert.equal(run('iqLevels.flatMap(l=>l[2]).length'),36);
+assert.equal(new Set(run('iqLevels.flatMap(l=>l[2])')).size,36);
+run("for(const l of iqLevels)for(const id of l[2])if(!lessonById[id])throw Error(id)");
+run("player=0;prefs().format='9';data.concepts[conceptKey('scan')]={explained:'2026-10-01',applied:'2026-10-01',recalled:'2026-10-01'}");assert.equal(run("conceptSecure('scan')"),false);
+run("data.concepts[conceptKey('scan')].recalled='2026-10-02'");assert.equal(run("conceptSecure('scan')"),true);
+run("prefs().format='11'");assert.equal(run("conceptSecure('scan')"),false);
+run("player=1;prefs().format='9'");assert.equal(run("conceptSecure('scan')"),false);
+for(const deck of ['touch','wing','engine'])for(let i=0;i<3;i++){run("ballDeck='"+deck+"';ballIndex="+i+";ballSession()");assert.ok(!run('hub.innerHTML').includes('undefined'))}
+run("player=0;day='B';sessionKey='0|new-plan|B';exerciseIndex=0");click({strengthPlan:'2'});assert.equal(run('cardRecord().goalSets'),2);
+assert.ok(run('hub.innerHTML').includes('Single-Leg Strength'));
+console.log('PASS: 36 concepts in six complete levels; later-day recall gate; per-player/per-format milestones; three ball decks; two-set strength selection.');

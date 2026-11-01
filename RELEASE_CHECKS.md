@@ -36,3 +36,18 @@
 - Added geometry assertions across all 18 poses; corrected split-squat knee direction and floor clearance.
 - Stronger purple/blue artwork, black frames, white figures and surfaces, and blue progress accents.
 - Existing functional regression suite passes. New browser visual review was blocked by preview-browser access; geometry tests are not professional anatomical certification.
+
+## Purpose-led training and Game IQ levels
+- Renamed strength sessions Full-Body Strength and Single-Leg Strength. Internal A/B IDs remain stable to preserve historical records.
+- Added explicit one-set learning / two-set building choices, player-specific load and rep targets, and prescription snapshots on completed sets. No automatic weight increases.
+- Strength progression informed by NSCA youth resistance-training guidance; exercise selection retained for available equipment and novice lifting technique. This is an original adaptation, not an imported third-party workout.
+- Three ball decks, including an optional controlled 20s work / 40s walk conditioning block.
+- 36 concept lessons in six Game IQ levels, with original scenarios and solo/brother adaptations and relevant FIFA watch/study references.
+- Explain / real example / later-day recall milestones, separated by player and game format; all levels remain accessible. These are self-reported, not assessed mastery.
+- Automated coverage: all level IDs unique/present, all lesson fields and demonstration links, recall day gate, player/format isolation, all ball decks and two-set selection.
+- Browser visual review and external video playback not reverified for this revision.
+
+References:
+- https://www.nsca.com/globalassets/about/position-statements/position_stand_youth_resistance_training---2009.pdf
+- https://www.fifatrainingcentre.com/en/game/game-analysis/landing-page-core-principles.php
+- Individual relevant coaching pages are linked in the app. Team sessions are study references; home drills are original small-space adaptations.
