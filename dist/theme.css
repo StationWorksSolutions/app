@@ -1,0 +1,48 @@
+/* Inspired by the crest displayed on CYSA's West Michigan Galaxy page.
+   These are visual approximations, not an official brand specification. */
+:root{--ink:#242127;--muted:#655f6b;--brand-black:#101012;--brand-purple:#662c8e;--brand-indigo:#211465;--brand-orange:#f15a24;--brand-gold:#e4b331;--brand-green:#009444;--brand-gray:#505052}
+body{background:#f5f4f7}
+body header{position:relative;overflow:hidden;background:var(--brand-black);border-bottom:6px solid var(--brand-purple)}
+body header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--brand-purple) 0% 35%,var(--brand-indigo) 35% 60%,var(--brand-orange) 60% 75%,var(--brand-green) 75% 88%,var(--brand-gold) 88%)}
+body header p{color:#d3cfd8}
+body .eyebrow{color:#dbbced}
+body button{background:#ece9f0}
+body .primary,body .profiles button.active,body .tabs button.active,body #sections button.active{background:var(--brand-purple);color:#fff}
+body a{color:#59227f}
+body button:focus-visible,body input:focus-visible,body select:focus-visible,body a:focus-visible{outline:3px solid var(--brand-orange);outline-offset:3px}
+body .panel,body .exercise{border-color:#ddd8e3}
+body .lesson-hero{background:var(--brand-indigo);border-top:5px solid var(--brand-purple);color:#fff}
+body .lesson-hero p,body .lesson-hero small{color:#e3ddeb}
+body .lesson-hero a{color:#fff;text-decoration:underline}
+body .week-card{border-top-color:var(--brand-purple)}
+body .week-card.light{border-top-color:var(--brand-orange)}
+body .demo{background:#f2edf7}
+body .note{border-left-color:var(--brand-purple)}
+/* Timer panel and launch controls are hidden at the user's request. */
+body #timer,body button[data-timer]{display:none!important}
+.step-track{display:flex;gap:6px;margin:16px 0}.step-track span{height:6px;flex:1;background:#e5ddeb;border-radius:10px}.step-track .filled{background:#7441a0}#myIdea{display:block;width:100%;min-height:100px;padding:14px;margin-top:10px;border:1px solid #c9c0d2;border-radius:12px;font:inherit}body button[aria-pressed=true]{background:#63288c;color:white}
+/* Clear action hierarchy and quieter surfaces across the player experience. */
+body{background:#f5f3f8}
+body button{transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease}
+body button:active{transform:scale(.98)}
+body .panel,body .exercise{box-shadow:0 4px 18px #21146506;border-color:#e6dfed}
+body .primary{background:#63288c;color:#fff;box-shadow:0 3px 10px #63288c25}
+body .journey-nav{background:#fff;border-top:1px solid #ded6e8;box-shadow:0 -5px 22px #2114650b;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+body .journey-nav button{color:#62576e;border-radius:14px;flex:1;max-width:180px}
+body .journey-nav button:hover{background:#eee7f5;color:#50206e}
+body .journey-nav button[aria-current=page]{background:#63288c;color:white;box-shadow:0 3px 10px #63288c26}
+body .journey-hero{background:linear-gradient(125deg,#20144f,#562179);border-bottom:4px solid #f15a24;box-shadow:0 8px 24px #21146519}
+body .journey-hero .primary{background:#fff;color:#421565;box-shadow:0 3px 12px #0002}
+body .learn-tile{border-left:5px solid #7441a0;border-radius:18px;min-height:150px;line-height:1.5}
+body .learn-tile:nth-child(3n+2){border-left-color:#dc701f}
+body .learn-tile:nth-child(3n){border-left-color:#188351}
+body .learn-tile small{color:#62556c;font-weight:700}
+body #journey>.panel{padding:24px;margin:20px 0}
+body #journey .row{gap:12px}
+body #journey .muted{color:#6b6074}
+body .focus-card{border-top:4px solid #7441a0}
+body #coachReply:not(:empty){padding:16px;border-radius:12px;background:#e9f4ed;color:#205738}
+body #journey a{font-weight:650;text-underline-offset:4px}
+@media(prefers-reduced-motion:reduce){body button{transition:none}body button:active{transform:none}}
+/* Count / hold / rest / complete retain their distinct functional colors. */
+@media print{body header{background:white;color:black;border-bottom:2px solid #505052}body header p,body .eyebrow{color:#242127}body header::after{display:none}}
