@@ -58,3 +58,10 @@ References:
 - Four daily strength rotations, same-day session snapshots, dated history labels; old A/B records preserved.
 - Tests pass for 108 lesson card renders, all storyboards, parser validation, daily rotation and stable resumed exercise selection.
 - Browser visual QA remains unavailable. Standalone SVG raster inspection was also unavailable because the renderer dependency is missing. Automated geometry/data checks are not tactical or usability validation.
+
+## Full-screen and tap-board revision
+- Expanded each new dated strength rotation to eight distinct existing movements, with dynamic exercise counts. Previously started decks retain their saved lineup.
+- Added full-screen card presentation, close button, Escape and top-of-card downward swipe exit. Swipe must still be tested on physical devices.
+- Replaced typed play commands in the UI with player/action controls and pitch taps, undo/reset and step-through playback.
+- Tests cover all-eight completion, preserved legacy records, builder moves/passes, invalid targets and close controls. Browser/mobile visual QA remains outstanding.
+- Account-name searches did not reliably identify the exact requested TikTok creators. No claim of reviewing those creators' clips. Related verified reference: https://academy.coachesvoice.com/ (tactics-board masterclasses).

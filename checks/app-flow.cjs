@@ -9,7 +9,7 @@ const run=s=>vm.runInContext(s,ctx);
 assert.equal(run('lessons.length'),36);
 assert.equal(new Set(run('lessons.map(l=>l.id)')).size,36);
 run(`for(const l of lessons){for(const f of ['why','solo','duo','scenario','answer','evidence'])if(!l[f])throw Error(l.id+' missing '+f);for(const id of l.video)if(!demoCatalog[id].url.startsWith('https:'))throw Error('Invalid link '+id)}`);
-run("showHub('Today')");assert.ok(run('hub.innerHTML').includes('Today’s five.'));assert.ok(!/Monday|Wednesday|Friday/.test(run('hub.innerHTML')));
+run("showHub('Today')");assert.ok(run('hub.innerHTML').includes('Today’s eight.'));assert.ok(!/Monday|Wednesday|Friday/.test(run('hub.innerHTML')));
 run("showHub('Learn')");assert.ok(run('hub.innerHTML').includes('36 CONCEPT CARDS'));
 run("day='A';sessionKey='0|test|A';exerciseIndex=0;liftSession()");assert.ok(run('hub.innerHTML').includes('Squat to a chair'));assert.ok(!run('hub.innerHTML').includes('<h1>Dumbbell floor press</h1>'));
 for(let i=0;i<5;i++){run('exerciseIndex='+i+';liftSession()');assert.ok(!run('hub.innerHTML').includes('undefined'))}
@@ -58,3 +58,12 @@ run("player=0;beginDaily()");const lineup=run('JSON.stringify(cardRecord().exerc
 for(let i=0;i<5;i++){run('exerciseIndex='+i+';liftSession()');assert.ok(!run('hub.innerHTML').includes('undefined'))}
 for(const id of run('lessons.map(l=>l.id)'))for(let i=0;i<3;i++){run("prefs().focus='"+id+"';step="+i+";focusStep()");assert.ok(!run('hub.innerHTML').includes('undefined'))}
 console.log('PASS: 36 concise storyboards; all 108 lesson cards render; play command validation; next-date rotation; same-date workout preservation and demo mappings.');
+assert.ok(run('rotations.every(r=>r.length===8&&new Set(r).size===8)'));
+run("player=1;day='R';sessionKey='1|full-deck-test|R';prepareDaily();data.trainingSessions[sessionKey]={completed:[],setChecks:{},goalSets:1,exerciseNames:workouts.R.map(e=>e[0])}");
+for(let i=0;i<8;i++){run('exerciseIndex='+i+';liftSession()');const n=run('cardSlots(exerciseIndex).length');for(let j=0;j<n;j++)click({cardDone:''});if(i<7)assert.ok(!run('hub.innerHTML').includes('Deck complete.'))}
+assert.ok(run('hub.innerHTML').includes('Deck complete.'));
+run('resetBoard();boardActor="A";boardPoint=[95,170];addBoardMove()');assert.equal(run('boardModel.frames.length'),2);
+run('boardAction="pass";boardPoint=[180,120];addBoardMove()');assert.equal(run('boardState().owner'), 'B');
+assert.ok(run('boardModel.frames.length===3'));run('boardPoint=[30,40];addBoardMove()');assert.equal(run('boardModel.frames.length'),3);
+run('step=0;focusStep()');assert.ok(run('hub.innerHTML').includes('data-close-card'));assert.ok(!run('hub.innerHTML').includes('playDescription'));
+console.log('PASS: eight distinct daily exercises; completion waits for all eight; visual player movement and passing; invalid targets rejected; close control and no command textbox.');
