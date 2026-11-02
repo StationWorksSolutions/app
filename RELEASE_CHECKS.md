@@ -51,3 +51,10 @@ References:
 - https://www.nsca.com/globalassets/about/position-statements/position_stand_youth_resistance_training---2009.pdf
 - https://www.fifatrainingcentre.com/en/game/game-analysis/landing-page-core-principles.php
 - Individual relevant coaching pages are linked in the app. Team sessions are study references; home drills are original small-space adaptations.
+
+## Visual-first deck revision
+- Home now uses three deck cards; Game IQ uses 36 concept-specific whiteboard storyboards and a three-card See / Predict / Try flow.
+- Tap/swipe frame navigation, replay and keyboard stepping. Optional constrained play-description builder with possession and pitch-bound validation.
+- Four daily strength rotations, same-day session snapshots, dated history labels; old A/B records preserved.
+- Tests pass for 108 lesson card renders, all storyboards, parser validation, daily rotation and stable resumed exercise selection.
+- Browser visual QA remains unavailable. Standalone SVG raster inspection was also unavailable because the renderer dependency is missing. Automated geometry/data checks are not tactical or usability validation.

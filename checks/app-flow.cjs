@@ -9,7 +9,7 @@ const run=s=>vm.runInContext(s,ctx);
 assert.equal(run('lessons.length'),36);
 assert.equal(new Set(run('lessons.map(l=>l.id)')).size,36);
 run(`for(const l of lessons){for(const f of ['why','solo','duo','scenario','answer','evidence'])if(!l[f])throw Error(l.id+' missing '+f);for(const id of l.video)if(!demoCatalog[id].url.startsWith('https:'))throw Error('Invalid link '+id)}`);
-run("showHub('Today')");assert.ok(run('hub.innerHTML').includes('Full-Body Strength'));assert.ok(!/Monday|Wednesday|Friday/.test(run('hub.innerHTML')));
+run("showHub('Today')");assert.ok(run('hub.innerHTML').includes('Today’s five.'));assert.ok(!/Monday|Wednesday|Friday/.test(run('hub.innerHTML')));
 run("showHub('Learn')");assert.ok(run('hub.innerHTML').includes('36 CONCEPT CARDS'));
 run("day='A';sessionKey='0|test|A';exerciseIndex=0;liftSession()");assert.ok(run('hub.innerHTML').includes('Squat to a chair'));assert.ok(!run('hub.innerHTML').includes('<h1>Dumbbell floor press</h1>'));
 for(let i=0;i<5;i++){run('exerciseIndex='+i+';liftSession()');assert.ok(!run('hub.innerHTML').includes('undefined'))}
@@ -48,3 +48,13 @@ for(const deck of ['touch','wing','engine'])for(let i=0;i<3;i++){run("ballDeck='
 run("player=0;day='B';sessionKey='0|new-plan|B';exerciseIndex=0");click({strengthPlan:'2'});assert.equal(run('cardRecord().goalSets'),2);
 assert.ok(run('hub.innerHTML').includes('Single-Leg Strength'));
 console.log('PASS: 36 concepts in six complete levels; later-day recall gate; per-player/per-format milestones; three ball decks; two-set strength selection.');
+assert.equal(run('Object.keys(lessonPlays).length'),36);
+run(`for(const l of lessons){const m=lessonPlays[l.id];if(!m||m.frames.length!==3)throw Error('Missing storyboard '+l.id);for(const f of m.frames){if(!f.text||f.text.split(' ').length>20)throw Error('Long caption '+l.id);for(const p of [...Object.values(f.actors||{}),f.ball].filter(Boolean))if(p[0]<0||p[0]>300||p[1]<0||p[1]>240)throw Error('Off pitch '+l.id)}}`);
+assert.equal(run("parsePlay('A passes to B. A runs right. B passes to A.').frames.length"),4);
+assert.throws(()=>run("parsePlay('B passes to A.')"));assert.throws(()=>run("parsePlay('<script>bad</script>')"));
+assert.equal(run("rotationIndex('2026-11-01',0)===rotationIndex('2026-11-01',0)"),true);
+assert.notEqual(run("rotationIndex('2026-11-01',0)"),run("rotationIndex('2026-11-02',0)"));
+run("player=0;beginDaily()");const lineup=run('JSON.stringify(cardRecord().exerciseNames)');run('beginDaily()');assert.equal(run('JSON.stringify(cardRecord().exerciseNames)'),lineup);
+for(let i=0;i<5;i++){run('exerciseIndex='+i+';liftSession()');assert.ok(!run('hub.innerHTML').includes('undefined'))}
+for(const id of run('lessons.map(l=>l.id)'))for(let i=0;i<3;i++){run("prefs().focus='"+id+"';step="+i+";focusStep()");assert.ok(!run('hub.innerHTML').includes('undefined'))}
+console.log('PASS: 36 concise storyboards; all 108 lesson cards render; play command validation; next-date rotation; same-date workout preservation and demo mappings.');
