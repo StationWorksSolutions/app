@@ -70,7 +70,7 @@ var pilot={
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]})}
 function catalog(){return root&&Array.isArray(root.GalaxyCurriculumCatalog)?root.GalaxyCurriculumCatalog:[]}
 function safeName(l){return domainNames[l.domainCode]||l.domainCode}
-function roadmapHTML(query,domain){
+function roadmapHTML(query,domain,browseOpen){
   var all=catalog(),q=String(query||'').trim().toLowerCase(),d=domain||'all';
   var filtered=all.filter(function(l){return (d==='all'||d===l.domainCode)&&(!q||[l.title,l.objective,l.id,l.subdomain].join(' ').toLowerCase().includes(q))});
   filtered.sort(function(a,b){return a.sequenceRank-b.sequenceRank});
@@ -81,7 +81,7 @@ function roadmapHTML(query,domain){
    '<div class="curriculum-track">'+['GI-001','TM-005','TM-006'].map(function(id,i){
      var l=pilot[id];return '<button type="button" class="curriculum-pilot" data-action="curriculum-open" data-id="'+id+'"><span>'+('0'+(i+1)).slice(-2)+' · STORYBOARD</span><strong>'+esc(l.title)+'</strong><small>'+esc(l.concept)+'</small></button>';
    }).join('')+'</div></div>'+
-   '<details class="curriculum-browse"><summary>Explore the 250-lesson roadmap</summary>'+
+   '<details class="curriculum-browse" '+(browseOpen?'open':'')+'><summary>Explore the 250-lesson roadmap</summary>'+
    '<form class="curriculum-query" id="curriculumSearchForm"><input name="query" aria-label="Search curriculum objectives" placeholder="Search passing, pressing, winger..." value="'+esc(query||'')+'" maxlength="100"><button class="button">Search</button></form>'+
    '<label class="curriculum-filter">Area <select id="curriculumDomain">'+
      '<option value="all">All areas</option>'+Object.keys(domainNames).map(function(k){return '<option value="'+k+'" '+(d===k?'selected':'')+'>'+esc(domainNames[k])+'</option>'}).join('')+'</select></label>'+
