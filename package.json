@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.3.0",
   "scripts": {
-    "test": "node checks/v3.cjs",
+    "test": "node checks/v3.cjs && node checks/physical-poc.cjs",
     "test:legacy": "node checks/verify.cjs && node checks/app-flow.cjs"
   }
 }
