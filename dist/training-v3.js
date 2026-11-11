@@ -9,19 +9,21 @@ function parse(json){try{return JSON.parse(json)}catch(e){return null}}
 var legacy=null;try{legacy=parse(localStorage.getItem(LEGACY))}catch(e){}
 var stored=null;try{stored=parse(localStorage.getItem(KEY))}catch(e){}
 var state=stored&&stored.schema===3?stored:{
- schema:3,names:(legacy&&Array.isArray(legacy.names)?legacy.names.slice(0,2):['Player 1','Player 2']),
+ schema:3,names:(legacy&&Array.isArray(legacy.names)?legacy.names.slice(0,2):['Jay','James']),
  active:0,format:['11','9'],level:[0,0],lessons:{},drills:{},workouts:{},logs:{},settings:{}
 };
-if(!Array.isArray(state.names))state.names=['Player 1','Player 2'];
+if(!Array.isArray(state.names))state.names=['Jay','James'];
 while(state.names.length<2)state.names.push('Player '+(state.names.length+1));
 ['lessons','drills','workouts','logs','settings'].forEach(function(k){if(!state[k]||typeof state[k]!=='object')state[k]={}});
 if(!Array.isArray(state.format))state.format=['11','9'];
 if(!Array.isArray(state.level))state.level=[0,0];
+while(state.format.length<state.names.length)state.format.push('11');
+while(state.level.length<state.names.length)state.level.push(0);
 var queryPlayer=Number(new URLSearchParams(location.search).get('player'));
-var player=queryPlayer>=1&&queryPlayer<=2?queryPlayer-1:(state.active===1?1:0);
+var player=queryPlayer>=1&&queryPlayer<=state.names.length?queryPlayer-1:(state.active>=0&&state.active<state.names.length?state.active:0);
 var page='home',overlay=null,phase=0,frame=0,revealed=false,lessonId='',track='first',workoutMode='build';
 var core=window.GalaxyCore?window.GalaxyCore.createRuntime(localStorage,state):null,coreSessionId=null;
-function corePlayer(){return core?core.playerIdForLegacyIndex(player):null}
+function corePlayer(){return core?(core.profiles()[player]||{}).id:null}
 function activateCore(module,id){
  if(!core)return 0;
  var old=core.resumable(corePlayer(),module,id);
@@ -160,7 +162,7 @@ function workoutHTML(){
 }
 function settingsHTML(){
  return '<section class="intro"><p class="eyebrow">PROFILE / BACKUP</p><h1>Family setup.</h1><p class="lead">These are profiles on one browser, not private user accounts.</p></section>'+
- '<section class="panel"><form id="settingsForm"><label class="field">Player 1 name<input name="name0" maxlength="35" value="'+esc(state.names[0])+'"></label><p></p><label class="field">Player 2 name<input name="name1" maxlength="35" value="'+esc(state.names[1])+'"></label><p><button class="primary" type="submit">Save names</button></p></form></section>'+
+ '<section class="panel"><form id="settingsForm">'+state.names.map(function(n,i){return '<label class="field">Player '+(i+1)+' name<input name="name'+i+'" maxlength="35" value="'+esc(n)+'"></label>'}).join('')+'<p><button class="primary" type="submit">Save names</button></p></form><form id="addPlayerForm"><label class="field">Additional player<input name="name" maxlength="35" placeholder="Player name"></label><button class="button" type="submit">Add player</button></form></section>'+
  '<section class="panel"><h3>Move or back up progress</h3><p>Export a copy of current progress and existing archived Galaxy records. Importing a backup replaces the current unified progress on this device; it does not create cloud sync.</p><div class="row"><button class="button" data-action="export">Export backup</button><label class="button">Import backup <input type="file" accept="application/json" id="importFile" style="max-width:170px"></label></div><p class="caption">An export may contain children’s names and notes; store it privately.</p></section>'+
  '<section class="panel"><h3>Saved activity</h3>'+statLine()+'<p class="caption">Older sessions, if any, are preserved under their original browser key and included in exports, not silently counted as new sessions.</p></section>';
 }
@@ -268,17 +270,18 @@ root.addEventListener('click',function(e){
 });
 root.addEventListener('change',function(e){
  var t=e.target;
- if(t.id==='playerSelect'){player=Number(t.value)===1?1:0;persist();overlay=null;render();return}
+ if(t.id==='playerSelect'){var selected=Number(t.value);player=Number.isInteger(selected)&&selected>=0&&selected<state.names.length?selected:0;persist();overlay=null;render();return}
  if(t.id==='formatSelect'){state.format[player]=t.value==='9'?'9':'11';persist();render();return}
  if(t.id==='appliedCheck'){var r=progress(lessonId);if(t.checked)r.applied=today();else delete r.applied;r.example=(document.getElementById('applicationInput')||{}).value||r.example||'';persist();render();return}
  if(t.id==='drillCheck'){var r2=drillRecord(drillTrack),id=trackById(drillTrack).ids[drillIndex];r2.done=r2.done.filter(function(x){return x!==id});if(t.checked)r2.done.push(id);persist();render();return}
  if(t.dataset.set){var w=workoutRecord();if(!w)return;if(t.checked)w.checks[t.dataset.set]=new Date().toISOString();else delete w.checks[t.dataset.set];if(isWorkoutDone(w))w.finished=w.finished||new Date().toISOString();else w.finished=null;persist();render();return}
- if(t.id==='importFile'&&t.files&&t.files[0]){var file=t.files[0];file.text().then(function(s){var obj=parse(s);if(!obj||obj.schema!==3||!obj.unified||obj.unified.schema!==3||!Array.isArray(obj.unified.names)||!obj.unified.lessons||!obj.unified.drills||!obj.unified.workouts){alert('This is not a Galaxy Training v3 backup. Nothing was changed.');return}state=obj.unified;state.names=state.names.slice(0,2).map(function(x){return String(x).slice(0,35)});if(obj.legacy){try{localStorage.setItem(LEGACY,JSON.stringify(obj.legacy));legacy=obj.legacy}catch(err){}}persist();page='home';overlay=null;render();alert('Backup imported to this browser.')} ).catch(function(){alert('Unable to read this file. Nothing was changed.')});return}
+ if(t.id==='importFile'&&t.files&&t.files[0]){var file=t.files[0];file.text().then(function(s){var obj=parse(s);if(!obj||obj.schema!==3||!obj.unified||obj.unified.schema!==3||!Array.isArray(obj.unified.names)||!obj.unified.lessons||!obj.unified.drills||!obj.unified.workouts){alert('This is not a Galaxy Training v3 backup. Nothing was changed.');return}state=obj.unified;state.names=state.names.map(function(x){return String(x).slice(0,35)});if(obj.legacy){try{localStorage.setItem(LEGACY,JSON.stringify(obj.legacy));legacy=obj.legacy}catch(err){}}persist();page='home';overlay=null;render();alert('Backup imported to this browser.')} ).catch(function(){alert('Unable to read this file. Nothing was changed.')});return}
 });
 root.addEventListener('input',function(e){if(e.target.id==='decisionInput'){decisionDraft=e.target.value;progress(lessonId).decision=decisionDraft;persist()}if(e.target.id==='applicationInput'){notesDraft=e.target.value;progress(lessonId).example=notesDraft;persist()}});
 root.addEventListener('submit',function(e){
  var form=e.target;if(form.id==='planForm'){e.preventDefault();var result=matchPlan(form.elements.request.value);if(!result){queryStatus='Describe a topic to find a session.';render();return}queryStatus=result.info;if(result.page){page=result.page;render()}else{openDrill(result.id)}return}
- if(form.id==='settingsForm'){e.preventDefault();state.names=[String(form.elements.name0.value||'Player 1').trim().slice(0,35)||'Player 1',String(form.elements.name1.value||'Player 2').trim().slice(0,35)||'Player 2'];persist();render();return}
+ if(form.id==='addPlayerForm'){e.preventDefault();var newName=String(form.elements.name.value||'').trim().slice(0,35);if(!newName||!core)return;core.addPlayer(newName);state.names.push(newName);state.format.push('11');state.level.push(0);player=state.names.length-1;persist();render();return}
+ if(form.id==='settingsForm'){e.preventDefault();state.names=state.names.map(function(n,i){return String(form.elements['name'+i]&&form.elements['name'+i].value||n).trim().slice(0,35)||n});persist();render();return}
  if(form.id==='logForm'){e.preventDefault();var k=player+'|'+today()+'|'+form.elements.kind.value;state.logs[k]={kind:form.elements.kind.value,note:String(form.elements.note.value||'').slice(0,400),date:today(),saved:new Date().toISOString()};persist();if(core&&form.elements.applied&&form.elements.applied.checked){var pending=Object.values(core.getState().sessions).find(function(s){return s.playerId===corePlayer()&&s.status==='awaiting_match_application'});if(pending){core.recordEvent({playerId:corePlayer(),type:'match_application',sessionId:pending.id,contentId:pending.contentId,details:{activity:form.elements.kind.value,note:state.logs[k].note}});core.transition(pending.id,'ready_for_review',{reviewDue:today()})}}page='progress';render();return}
 });
 document.addEventListener('keydown',function(e){if(!overlay)return;if(e.key==='Escape'){e.preventDefault();close()}else if(overlay==='lesson'&&phase===0&&!/INPUT|TEXTAREA/.test(e.target.tagName)){if(e.key==='ArrowRight'){frame++;render()}if(e.key==='ArrowLeft'){frame--;render()}}});
