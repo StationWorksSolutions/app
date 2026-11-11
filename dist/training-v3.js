@@ -162,7 +162,7 @@ function workoutHTML(){
  '<p class="lead">Exercise demonstrations are being reviewed for safe, age-appropriate technique. Do not follow the previous stick-figure illustrations. Independent workouts will return only after the movement demonstrations pass a qualified review.</p></section>'+
  '<section class="panel" role="status"><h2>Movement safety review</h2><p>Strength sessions cannot be started or resumed in this preview until verified instructional media is integrated.</p>'+
  '<p class="caption">'+past+' earlier workout record(s) remain saved on this device. Their progress has not been deleted.</p>'+
- '<button class="button" data-action="nav" data-path="train">Back to Train</button></section>';
+ '<p class="caption">Review-only: five experimental animated movements are available to inspect. They are not verified coaching instructions.</p>'+'<p><a class="button" href="./biomechanics-review.html" target="_blank" rel="noopener noreferrer">View five movement animations (review) ↗</a></p>'+'<button class="button" data-action="nav" data-path="train">Back to Train</button></section>';
 }
 function scheduleHTML(){
  if(!core)return '';
