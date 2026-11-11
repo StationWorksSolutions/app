@@ -1,0 +1,31 @@
+/* Curriculum workstream review UI: non-publishing, uses the existing Galaxy shell. */
+.curriculum-surface{margin:16px 0 28px;background:#171d34;border:1px solid #3a466d;border-radius:22px;overflow:hidden;color:#f1f4ff}
+.curriculum-lead{padding:20px}.curriculum-lead h2{font-size:clamp(24px,6vw,30px);line-height:1.1;letter-spacing:-.025em;margin:8px 0}.curriculum-lead p{color:#d1dbf1}
+.curriculum-track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px}
+.curriculum-pilot{font:inherit;text-align:left;border:1px solid #62649e;border-radius:15px;background:#27264d;color:#fff;padding:13px 10px;min-height:116px;cursor:pointer}
+.curriculum-pilot span{display:block;font-size:10px;letter-spacing:.05em;color:#d5c9ff;font-weight:800}
+.curriculum-pilot strong{display:block;font-size:14px;line-height:1.25;margin:12px 0 5px}.curriculum-pilot small{display:block;font-size:11px;color:#c1cbec}
+.curriculum-pilot:focus-visible,.curriculum-result button:focus-visible,.curriculum-decision button:focus-visible{outline:3px solid #69d8fa;outline-offset:2px}
+.curriculum-browse{border-top:1px solid #3a466d;padding:13px 20px 18px}
+.curriculum-browse summary{cursor:pointer;font-weight:800;padding:7px 0}
+.curriculum-query{display:flex;gap:8px;margin:15px 0}.curriculum-query input{flex:1;min-width:0;border:1px solid #6c729e;background:#10172b;color:#fff;border-radius:10px;padding:12px}
+.curriculum-filter{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#d1dbf1}
+.curriculum-filter select{padding:9px;border:1px solid #6c729e;border-radius:10px;color:white;background:#202844}
+.curriculum-result{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #39425e;padding:12px 0}
+.curriculum-result>div{flex:1;min-width:0}.curriculum-result small,.curriculum-result b{display:block}.curriculum-result small{color:#bcb8ed}.curriculum-result b{margin-top:4px}.curriculum-result p{font-size:12px;margin:3px 0;color:#c4cde3}
+.curriculum-result .button{white-space:nowrap}.curriculum-pending{color:#aeb9d0;font-size:11px;white-space:nowrap}
+.curriculum-session{padding-bottom:12px}.curriculum-session h2{font-size:clamp(22px,7vw,33px);margin:9px 0}.curriculum-session p{line-height:1.5}
+.curriculum-steps{display:flex;gap:7px;margin:12px 0 16px}.curriculum-steps span{flex:1;text-align:center;background:#252c49;padding:9px 4px;border-radius:10px;color:#abb8d7;font-size:12px}.curriculum-steps span.is-current{background:#6653b1;color:#fff;font-weight:700}
+.curriculum-visual{background:#071924;border-radius:18px;padding:10px;max-width:520px;margin:0 auto}.curriculum-visual svg{width:100%;height:auto;max-height:42vh;display:block}
+.curriculum-frame-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px}
+.curriculum-scene{font-weight:650;padding-top:9px}.curriculum-cues{display:grid;gap:8px;margin:16px 0}.curriculum-cues h3{margin:0;font-size:15px}
+.curriculum-cues span{display:block;background:#222c47;padding:10px 12px;border-radius:10px}
+.curriculum-decision{border-top:1px solid #445272;padding-top:15px}.curriculum-decision h3{margin:4px 0}
+.curriculum-decision button{display:block;width:100%;font:inherit;text-align:left;padding:12px;border:1px solid #69718f;background:#242b46;color:#fff;border-radius:12px;margin:7px 0;cursor:pointer}
+.curriculum-decision button.chosen{border-color:#89e6ff;background:#253c67}
+.curriculum-decision button:disabled{opacity:.45;cursor:not-allowed}
+.curriculum-rationale{padding:12px;border-radius:12px;background:#202e4a;margin:12px 0}
+.curriculum-rationale p{margin:7px 0}
+.curriculum-practice,.curriculum-apply{background:#202a47;border-radius:17px;padding:18px}
+.curriculum-warning{border-top:1px solid #555d7c;padding-top:10px;color:#ffcda4;font-size:12px;margin-top:22px}
+@media(max-width:420px){.curriculum-track{grid-template-columns:1fr}.curriculum-pilot{min-height:0}.curriculum-pilot strong{margin:8px 0 2px}.curriculum-result{align-items:flex-start}.curriculum-result .button{font-size:11px;padding:8px}}
