@@ -87,7 +87,7 @@ function renderFigure(){
  const blue='#4da8f9',purple='#aa85ff',dark='#54558b',ink='#0b1026';
  const bones=[['lhip','lk',dark,14],['lk','lankle',dark,12],['rhip','rk',purple,14],['rk','rankle',purple,12],['lsh','le',dark,11],['le','lw',dark,10],['rsh','re',blue,11],['re','rw',blue,10]];
  let s='<defs><linearGradient id="shirt" x1="0" x2="1"><stop stop-color="#9268ed"/><stop offset="1" stop-color="#559dfa"/></linearGradient></defs>';
- s+='<ellipse cx="181" cy="384" rx="132" ry="10" fill="#020517" opacity=".22"/><path d="M22 380H338" stroke="#7b81a8" opacity=".7" stroke-width="3" stroke-linecap="round"/>';
+ const ground=front?380:365;s+='<ellipse cx="181" cy="'+(ground+4)+'" rx="132" ry="8" fill="#020517" opacity=".22"/><path d="M22 '+ground+'H338" stroke="#7b81a8" opacity=".7" stroke-width="3" stroke-linecap="round"/>';
  // Outline preserves the figure's silhouette when limbs overlap.
  for(const [a,b,c,w] of bones){s+=line(j[a],j[b],w+6,ink)}
  s+=line(j.h,j.shoulder,25,ink)+line(j.lsh,j.rsh,17,ink);
