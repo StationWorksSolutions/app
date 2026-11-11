@@ -56,9 +56,23 @@ for(const [i,id] of expected.entries()){
     }
   }
 }
+
+const fixedStances={
+  'bodyweight-squat':[['lankle',[180,362]]],
+  'split-squat':[['lankle',[224,360]],['rankle',[124,360]]],
+  'single-leg-rdl':[['lankle',[178,362]]]
+};
+for(const [id,anchors] of Object.entries(fixedStances)){
+  for(const t of [0,.12,.3,.43,.56,.72,.9,1]){
+    const points=api.snapshot(id,t).joints;
+    for(const [joint,expected] of anchors){
+      assert.ok(distance(points[joint],expected)<0.001,id+' foot anchor at '+t+' for '+joint);
+    }
+  }
+}
 elements.get('library').children[4].events.click();
 assert.equal(elements.get('movement-title').textContent,'Acceleration start');
 elements.get('play').events.click();
 callback(1000);callback(1500);callback(2000);
 assert.match(elements.get('phase-hint').textContent,/Playing|Paused/);
-console.log('Physical motion POC: 5 movement definitions, 35 frame samples, fixed segment geometry, SVG startup and reduced-motion checks PASS');
+console.log('Physical motion POC: 5 movement definitions, 35 frame samples, planted foot anchors, fixed segment geometry, SVG startup and reduced-motion checks PASS');
