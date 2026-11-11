@@ -1,4 +1,9 @@
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const html=fs.readFileSync('dist/index.html','utf8');
+assert.match(html,/curriculum-gate\\.js/);
+assert.match(html,/curriculum-pilot\\.js/);
+assert.match(html,/training-v3\\.js/,'existing app entry preserved');
 const curriculum=require('../dist/curriculum-gate.js');
 const pilot=require('../dist/curriculum-pilot.js');
 const Core=require('../dist/core-foundation.js');
@@ -38,6 +43,10 @@ assert.ok(!curriculum.published({...fixture,contentVersion:'rev-2'},ctx),'new re
 assert.ok(!curriculum.published({...fixture,watch:{...fixture.watch,mediaIds:['bad-id']}},ctx),'unverified media rejected');
 assert.ok(!curriculum.published({...fixture,practice:{drillId:'not-found'}},ctx),'missing drill rejected');
 assert.ok(!curriculum.published({...fixture,assessments:[]},ctx),'missing assessment rejected');
+assert.ok(!curriculum.published(fixture,{...ctx,media:{'vid-scan-v1':{...media['vid-scan-v1'],kind:'diagram'}}}),'video-first publication gate rejects diagram-only watch');
+const child={...fixture,id:'TM-005',lessonId:'TM-005',prerequisites:['GI-003']};
+assert.ok(curriculum.publicationIssues(child,{...ctx,lessons:[child,lessons[1]]}).includes('unpublished prerequisite GI-003'),'unready prerequisite blocks release');
+
 assert.ok(!curriculum.published({...fixture,concept:{definition:'Placeholder'}},ctx),'placeholder concepts rejected');
 assert.ok(!curriculum.published({...fixture,reviews:{}},ctx),'missing human reviews rejected');
 assert.ok(curriculum.eligible([fixture],ctx,[],['GK']).length===0,'GK role filter does not assign an outfield-only optional lesson');
