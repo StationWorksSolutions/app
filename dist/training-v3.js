@@ -160,11 +160,24 @@ function workoutHTML(){
  (!w?'<div class="lesson-list"><button class="listcard" data-action="choose-workout" data-mode="technique"><span class="meta">8 MOVEMENTS · 1 SET</span><h3>Technique</h3><p>Practice movement patterns with less load. Suitable for practice days or lower-energy days.</p><span class="go">Start technique →</span></button><button class="listcard" data-action="choose-workout" data-mode="build"><span class="meta">10 MOVEMENTS · 2 SETS</span><h3>Build</h3><p>Balanced legs, upper body, trunk, and control. Rest when form slips.</p><span class="go">Start build →</span></button></div>':'')+
  '<div class="notice">Rest is part of development. On match days, after hard team practice, or with pain, skipping extra training can be the right choice. Stop if movement hurts.</div>';
 }
+function scheduleHTML(){
+ if(!core)return '';
+ var c=core.getState().schedule,id=corePlayer(),weekly=c.weekly[id]||[],dated=c.dated[id]||[];
+ var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+ var kinds='<option value="practice">Team practice</option><option value="futsal">Futsal</option><option value="match">Match</option><option value="recovery">Recovery</option><option value="none">Clear this day</option>';
+ return '<details class="panel"><summary>Training calendar</summary><p class="caption">Scheduling changes recommendations without adding extra workouts. Add known dates; do not assume match dates.</p>'+
+ '<p>'+esc(weekly.map(function(e){return days[e.day]+': '+e.kind}).join(' · ')||'No weekly activities set')+'</p>'+
+ '<form id="weeklyScheduleForm"><label class="field">Day<select name="day">'+days.map(function(d,i){return '<option value="'+i+'">'+d+'</option>'}).join('')+'</select></label>'+
+ '<label class="field">Activity<select name="kind">'+kinds+'</select></label><button class="button">Save weekly day</button></form>'+
+ '<p>'+esc(dated.map(function(e){return e.date+': '+e.kind}).join(' · ')||'No dated activities set')+'</p>'+
+ '<form id="datedScheduleForm"><label class="field">Date<input type="date" name="date" required></label>'+
+ '<label class="field">Activity<select name="kind">'+kinds+'</select></label><button class="button">Save dated activity</button></form></details>';
+}
 function settingsHTML(){
  return '<section class="intro"><p class="eyebrow">PROFILE / BACKUP</p><h1>Family setup.</h1><p class="lead">These are profiles on one browser, not private user accounts.</p></section>'+
  '<section class="panel"><form id="settingsForm">'+state.names.map(function(n,i){return '<label class="field">Player '+(i+1)+' name<input name="name'+i+'" maxlength="35" value="'+esc(n)+'"></label>'}).join('')+'<p><button class="primary" type="submit">Save names</button></p></form><form id="addPlayerForm"><label class="field">Additional player<input name="name" maxlength="35" placeholder="Player name"></label><button class="button" type="submit">Add player</button></form></section>'+
  '<section class="panel"><h3>Move or back up progress</h3><p>Export a copy of current progress and existing archived Galaxy records. Importing a backup replaces the current unified progress on this device; it does not create cloud sync.</p><div class="row"><button class="button" data-action="export">Export backup</button><label class="button">Import backup <input type="file" accept="application/json" id="importFile" style="max-width:170px"></label></div><p class="caption">An export may contain children’s names and notes; store it privately.</p></section>'+
- '<section class="panel"><h3>Saved activity</h3>'+statLine()+'<p class="caption">Older sessions, if any, are preserved under their original browser key and included in exports, not silently counted as new sessions.</p></section>';
+ scheduleHTML()+'<section class="panel"><h3>Saved activity</h3>'+statLine()+'<p class="caption">Older sessions, if any, are preserved under their original browser key and included in exports, not silently counted as new sessions.</p></section>';
 }
 function render(){
  root.innerHTML=navHTML()+'<main class="shell">'+(page==='home'?homeHTML():page==='learn'?learnHTML():page==='train'?trainHTML():page==='progress'?progressHTML():page==='log'?logHTML():page==='finish'?finishHTML():page==='drills'?drillsHTML():page==='workout'?workoutHTML():settingsHTML())+'</main>'+(overlay?overlayHTML():'');
@@ -280,6 +293,12 @@ root.addEventListener('change',function(e){
 root.addEventListener('input',function(e){if(e.target.id==='decisionInput'){decisionDraft=e.target.value;progress(lessonId).decision=decisionDraft;persist()}if(e.target.id==='applicationInput'){notesDraft=e.target.value;progress(lessonId).example=notesDraft;persist()}});
 root.addEventListener('submit',function(e){
  var form=e.target;if(form.id==='planForm'){e.preventDefault();var result=matchPlan(form.elements.request.value);if(!result){queryStatus='Describe a topic to find a session.';render();return}queryStatus=result.info;if(result.page){page=result.page;render()}else{openDrill(result.id)}return}
+ if(form.id==='weeklyScheduleForm'&&core){e.preventDefault();var day=Number(form.elements.day.value),kind=form.elements.kind.value;
+ var calendar=core.getState().schedule,id=corePlayer(),weekly=(calendar.weekly[id]||[]).filter(function(e){return e.day!==day});
+ if(kind!=='none')weekly.push({day:day,kind:kind});core.setSchedule(id,weekly,calendar.dated[id]||[]);render();return}
+ if(form.id==='datedScheduleForm'&&core){e.preventDefault();var date=form.elements.date.value,kind=form.elements.kind.value;
+ var calendar=core.getState().schedule,id=corePlayer(),dated=(calendar.dated[id]||[]).filter(function(e){return e.date!==date});
+ if(kind!=='none')dated.push({date:date,kind:kind});core.setSchedule(id,calendar.weekly[id]||[],dated);render();return}
  if(form.id==='addPlayerForm'){e.preventDefault();var newName=String(form.elements.name.value||'').trim().slice(0,35);if(!newName||!core)return;core.addPlayer(newName);state.names.push(newName);state.format.push('11');state.level.push(0);player=state.names.length-1;persist();render();return}
  if(form.id==='settingsForm'){e.preventDefault();state.names=state.names.map(function(n,i){return String(form.elements['name'+i]&&form.elements['name'+i].value||n).trim().slice(0,35)||n});persist();render();return}
  if(form.id==='logForm'){e.preventDefault();var k=player+'|'+today()+'|'+form.elements.kind.value;state.logs[k]={kind:form.elements.kind.value,note:String(form.elements.note.value||'').slice(0,400),date:today(),saved:new Date().toISOString()};persist();if(core&&form.elements.applied&&form.elements.applied.checked){var pending=Object.values(core.getState().sessions).find(function(s){return s.playerId===corePlayer()&&s.status==='awaiting_match_application'});if(pending){core.recordEvent({playerId:corePlayer(),type:'match_application',sessionId:pending.id,contentId:pending.contentId,details:{activity:form.elements.kind.value,note:state.logs[k].note}});core.transition(pending.id,'ready_for_review',{reviewDue:today()})}}page='progress';render();return}
