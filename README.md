@@ -1,19 +1,31 @@
 # Galaxy Training
 
-Youth soccer learning and strength-session prototype. Buildless HTML/CSS/JavaScript in `dist/`.
+Visual-first soccer development web app for two browser-local player profiles.
 
-## Run and test
+## Current application (v3)
 
-Serve `dist/` with any local static web server. Run `npm test` with Node 22 or newer; no dependency install required. GitHub Actions runs the same regression checks for pushes and pull requests.
+The entrypoint is dist/index.html. Architecture:
+- dist/content-v3.js: 36 Game IQ concepts, six levels, coaching references, tactical storyboards and nine original exercise illustrations.
+- dist/training-v3.js: Learn / Drills / Workout, player selection, progress, goal matching and backup.
+- dist/training-v3.css: responsive UI.
+- checks/v3.cjs: content integrity and application regression tests.
 
-## Deployment
+Prior scripts are retained for reference but are not loaded by the v3 entrypoint. Do not introduce another competing navigation stack.
 
-Import this repository into Vercel with the included configuration. The build runs regression tests and serves `dist/`. Vercel is not connected by adding this file; account setup is still required. Use preview deployments for review before merging to main. Do not enable production sharing until its audience and storage limitations are accepted.
+## Run and release
 
-## Data and access
+Serve the dist/ directory on a static server. Run npm test with Node 22+. GitHub Actions runs the same checks. vercel.json serves dist after the passing test.
 
-Records stay in localStorage on the current browser and origin. Player selectors are profiles, not authentication. No database, cross-device sync, or parent account exists. Switching hosting origins does not transfer existing records; export a backup before moving. No user records or credentials belong in this repository.
+A passing test does NOT mean the app is deployed. Connect the GitHub repo to Vercel, use a branch preview, validate on an actual phone, then approve and merge. Vercel is not connected merely by adding configuration.
 
-## Release status
+## Storage and privacy
 
-This is a tested local-storage prototype, not yet a family-account production release. See RELEASE_CHECKS.md for evidence and remaining gates.
+Unified records use browser localStorage key galaxy-training-unified-v3. Existing data in galaxy-training-v1 remains untouched. Existing names copy into new profiles when v3 has not been initialized. Backup exports both versions; importing a v3 backup replaces unified progress on the current browser.
+
+Profiles are not authentication. Records do not sync between phones, domains or accounts; clearing site data can erase them.
+
+## Coaching scope
+
+Lessons follow see/predict/try with illustrative storyboards and self-reported practice. The natural-language session selector matches keyword topics to existing drill decks; it is not generative AI. Technique workouts have eight movements and Build workouts have ten; weighted work needs adult supervision, and recovery takes priority.
+
+See RELEASE_V3.md for verified scope and pending release checks.

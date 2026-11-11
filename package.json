@@ -1,1 +1,9 @@
-{"name":"galaxy-training","private":true,"version":"0.1.0","scripts":{"test":"node checks/verify.cjs && node checks/app-flow.cjs"}}
+{
+  "name": "galaxy-training",
+  "private": true,
+  "version": "0.3.0",
+  "scripts": {
+    "test": "node checks/v3.cjs",
+    "test:legacy": "node checks/verify.cjs && node checks/app-flow.cjs"
+  }
+}
