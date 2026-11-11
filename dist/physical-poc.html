@@ -71,11 +71,37 @@ let active=0,clock=0,last=0,playing=!matchMedia('(prefers-reduced-motion: reduce
 function interpolate(a,b,k){let out={};for(const key in a){out[key]=a[key]+(b[key]-a[key])*k}return out}
 function poseAt(ex,t){const frames=ex.frames;for(let i=1;i<frames.length;i++){if(t<=frames[i].t){const a=frames[i-1],b=frames[i];let k=(t-a.t)/(b.t-a.t);k=k*k*(3-2*k);return interpolate(a.p,b.p,k)}}return frames[frames.length-1].p}
 function joint(origin,len,angle){return [origin[0]+len*Math.sin(rad(angle)),origin[1]+len*Math.cos(rad(angle))]}
-function skeleton(p,view){
+// Phase B kinematic constraints: planted feet have stable ankle anchors.
+// This enforces 2D segment geometry, NOT biomechanical safety, force or coach approval.
+function anchoredPose(p,exercise){
+ if(!exercise||!['bodyweight-squat','single-leg-rdl','split-squat'].includes(exercise.id))return p;
+ const q={...p};
+ if(exercise.id==='split-squat'){q.x=181;q.y=Math.max(230,p.y);return q}
+ const anchor=exercise.id==='bodyweight-squat'?[180,362]:[178,362];
+ q.x=anchor[0]-(-4+SEG.thigh*Math.sin(rad(p.lt))+SEG.shin*Math.sin(rad(p.ls)));
+ q.y=anchor[1]-SEG.thigh*Math.cos(rad(p.lt))-SEG.shin*Math.cos(rad(p.ls));
+ return q;
+}
+function solveKnee(hip,ankle,choose){
+ const dx=ankle[0]-hip[0],dy=ankle[1]-hip[1],d=Math.hypot(dx,dy);
+ if(d>SEG.thigh+SEG.shin||d<Math.abs(SEG.thigh-SEG.shin)||d===0)throw Error('Unreachable planted joint');
+ const a=(SEG.thigh**2-SEG.shin**2+d*d)/(2*d),v=Math.sqrt(Math.max(0,SEG.thigh**2-a*a));
+ const cx=hip[0]+a*dx/d,cy=hip[1]+a*dy/d;
+ const options=[[cx-v*dy/d,cy+v*dx/d],[cx+v*dy/d,cy-v*dx/d]];
+ return choose==='forward'?options.reduce((a,b)=>a[0]>b[0]?a:b):options.reduce((a,b)=>a[1]>b[1]?a:b);
+}
+function skeleton(p,view,exercise){
+ p=anchoredPose(p,exercise);
  const front=view==='front',h=[p.x,p.y],shoulder=joint(h,-SEG.spine,p.lean),neck=joint(shoulder,-13,p.lean),head=joint(neck,-30,p.lean);
  const lhip=[p.x-(front?17:4),p.y],rhip=[p.x+(front?17:4),p.y],lsh=[shoulder[0]-(front?25:5),shoulder[1]],rsh=[shoulder[0]+(front?25:5),shoulder[1]];
- const lk=joint(lhip,SEG.thigh,p.lt),rk=joint(rhip,SEG.thigh,p.rt);
- const lankle=joint(lk,SEG.shin,p.ls),rankle=joint(rk,SEG.shin,p.rs);
+ let lk,rk,lankle,rankle;
+ if(exercise&&exercise.id==='split-squat'){
+  lankle=[224,360];rankle=[124,360];
+  lk=solveKnee(lhip,lankle,'forward');rk=solveKnee(rhip,rankle,'down');
+ }else{
+  lk=joint(lhip,SEG.thigh,p.lt);rk=joint(rhip,SEG.thigh,p.rt);
+  lankle=joint(lk,SEG.shin,p.ls);rankle=joint(rk,SEG.shin,p.rs);
+ }
  const le=joint(lsh,SEG.upperArm,p.la),re=joint(rsh,SEG.upperArm,p.ra),lw=joint(le,SEG.forearm,p.lf),rw=joint(re,SEG.forearm,p.rf);
  return {h,shoulder,neck,head,lhip,rhip,lsh,rsh,lk,rk,lankle,rankle,le,re,lw,rw};
 }
@@ -83,7 +109,7 @@ function n(x){return Number(x).toFixed(1)}
 function line(a,b,width,color){return '<line x1="'+n(a[0])+'" y1="'+n(a[1])+'" x2="'+n(b[0])+'" y2="'+n(b[1])+'" stroke="'+color+'" stroke-width="'+width+'" stroke-linecap="round"/>'}
 function circ(pt,r,color,stroke='#eef0ff',sw=3){return '<circle cx="'+n(pt[0])+'" cy="'+n(pt[1])+'" r="'+r+'" fill="'+color+'" stroke="'+stroke+'" stroke-width="'+sw+'"/>'}
 function renderFigure(){
- const m=EXERCISES[active],p=poseAt(m,clock),j=skeleton(p,m.view),front=m.view==='front';
+ const m=EXERCISES[active],p=poseAt(m,clock),j=skeleton(p,m.view,m),front=m.view==='front';
  const blue='#4da8f9',purple='#aa85ff',dark='#54558b',ink='#0b1026';
  const bones=[['lhip','lk',dark,14],['lk','lankle',dark,12],['rhip','rk',purple,14],['rk','rankle',purple,12],['lsh','le',dark,11],['le','lw',dark,10],['rsh','re',blue,11],['re','rw',blue,10]];
  let s='<defs><linearGradient id="shirt" x1="0" x2="1"><stop stop-color="#9268ed"/><stop offset="1" stop-color="#559dfa"/></linearGradient></defs>';
@@ -128,7 +154,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){playing=fa
 function tick(now){if(last&&playing){const next=clock+Math.min(60,now-last)*.001*speed/3.1;if(EXERCISES[active].loop===false&&next>=1){clock=1;playing=false}else clock=next%1;repaint()}last=now;requestAnimationFrame(tick)}
 select(0);requestAnimationFrame(tick);
 // Expose read-only inspection API for manual kinematic review and future extraction.
-Object.defineProperty(window,'GALAXY_MOTION_POC',{value:Object.freeze({version:1,exercises:EXERCISES.map(x=>({id:x.id,name:x.name,status:'coach-review-required'})),snapshot:(id,t)=>{const m=EXERCISES.find(x=>x.id===id);return m?{pose:poseAt(m,Math.max(0,Math.min(1,t))),joints:skeleton(poseAt(m,Math.max(0,Math.min(1,t))),m.view)}:null}}),writable:false});
+Object.defineProperty(window,'GALAXY_MOTION_POC',{value:Object.freeze({version:1,exercises:EXERCISES.map(x=>({id:x.id,name:x.name,status:'coach-review-required'})),snapshot:(id,t)=>{const m=EXERCISES.find(x=>x.id===id);return m?{pose:poseAt(m,Math.max(0,Math.min(1,t))),joints:skeleton(poseAt(m,Math.max(0,Math.min(1,t))),m.view,m)}:null}}),writable:false});
 })();
 </script>
 </body></html>
