@@ -2,6 +2,7 @@
 (function(){
 'use strict';
 var source=window.GALAXY_CONTENT;
+var curriculumSearch='',curriculumDomain='all',curriculumBrowseOpen=false,curriculumId='',curriculumPhase=0,curriculumFrame=0,curriculumChoice='',curriculumRevealed=false;
 var root=document.getElementById('app');
 if(!root||!source||!Array.isArray(source.lessons)){if(root)root.innerHTML='<main class="error">Unable to load the training library. Reload the page.</main>';return;}
 var KEY='galaxy-training-unified-v3',LEGACY='galaxy-training-v1';
@@ -132,7 +133,8 @@ function finishHTML(){
 function learnHTML(){
  var n=Math.max(0,Math.min(5,Number(state.level[player])||0)),level=source.levels[n];
  return '<section class="intro"><p class="eyebrow">LEARN / GAME IQ</p><h1>Think before you play.</h1><p class="lead">36 situations across six levels. Each card asks you to notice, choose, and apply an idea. Lessons are always open.</p></section>'+
- '<div class="option-row" aria-label="Learning levels">'+source.levels.map(function(l,i){return '<button data-action="level" data-index="'+i+'" aria-pressed="'+(i===n)+'">'+(i+1)+'. '+esc(l[0])+'</button>'}).join('')+'</div>'+
+ (window.GalaxyCurriculumExperience?window.GalaxyCurriculumExperience.roadmapHTML(curriculumSearch,curriculumDomain,curriculumBrowseOpen):'')+
+  '<div class="option-row" aria-label="Learning levels">'+source.levels.map(function(l,i){return '<button data-action="level" data-index="'+i+'" aria-pressed="'+(i===n)+'">'+(i+1)+'. '+esc(l[0])+'</button>'}).join('')+'</div>'+
  '<section class="panel"><p class="eyebrow">LEVEL '+(n+1)+'</p><div class="split"><div><h2>'+esc(level[0])+'</h2><p>'+esc(level[1])+'</p></div><label class="field">Game format<select id="formatSelect"><option value="9" '+(state.format[player]==='9'?'selected':'')+'>9v9</option><option value="11" '+(state.format[player]==='11'?'selected':'')+'>11v11</option></select></label></div>'+
  '<div class="progressline"><span style="width:'+Math.round(level[2].filter(function(id){return !!progress(id).applied}).length/6*100)+'%"></span></div><p class="caption">Practice markers are self-reported, not assessed soccer mastery.</p></section>'+
  '<div class="lesson-list">'+level[2].map(function(id){var l=source.byId[id];if(!l)return '';var p=progress(id),status=p.applied?'Practiced':p.seen?'Explored':'New';return '<button class="listcard" data-action="lesson" data-id="'+esc(id)+'"><span class="meta">'+esc(l.category)+' · '+status+'</span><h3>'+esc(l.title)+'</h3><p>'+esc((l.cues||[])[0]||l.why)+'</p><span class="go">Open lesson →</span></button>'}).join('')+'</div>';
@@ -215,14 +217,16 @@ function drillHTML(){
 }
 function workoutHTMLCard(){return '<section role="alert"><h2>Workout demonstration unavailable</h2><p>Independent exercise instruction is suspended until approved movement media is integrated.</p></section>';}
 function overlayHTML(){
- var mode=overlay,heading=mode==='lesson'?'LEARN / GAME IQ':mode==='drill'?'DRILLS / BALL LAB':'WORKOUT / MOVEMENT';
- var body=mode==='lesson'?lessonHTML():mode==='drill'?drillHTML():workoutHTMLCard();
+ var mode=overlay,heading=mode==='curriculum'?'CURRICULUM / REVIEW DRAFT':mode==='lesson'?'LEARN / GAME IQ':mode==='drill'?'DRILLS / BALL LAB':'WORKOUT / MOVEMENT';
+ var body=mode==='curriculum'&&window.GalaxyCurriculumExperience?window.GalaxyCurriculumExperience.lessonHTML(curriculumId,curriculumPhase,curriculumFrame,curriculumChoice,curriculumRevealed):mode==='lesson'?lessonHTML():mode==='drill'?drillHTML():workoutHTMLCard();
  var footer='';
+ if(mode==='curriculum')footer='<button class="button" data-action="curriculum-prev" '+(curriculumPhase===0?'disabled':'')+'>← Back</button><button class="primary" data-action="curriculum-next">'+(curriculumPhase===2?'Close draft':'Continue →')+'</button>';
  if(mode==='lesson')footer='<button class="button" data-action="lesson-back" '+(phase===0?'disabled':'')+'>← Back</button><button class="primary" data-action="lesson-next">'+(phase===2?'Finish lesson':'Continue →')+'</button>';
  if(mode==='drill'){var t=trackById(drillTrack);footer='<button class="button" data-action="drill-move" data-step="-1" '+(drillIndex===0?'disabled':'')+'>← Previous</button><button class="primary" data-action="drill-move" data-step="1">'+(drillIndex===t.ids.length-1?'Finish':'Next drill →')+'</button>'}
  if(mode==='workout')footer='<button class="button" data-action="close">Close</button>';
  return '<section class="overlay" role="dialog" aria-modal="true" aria-label="'+heading+'" id="activeOverlay"><div class="overlay-inner"><div class="overlay-head"><span class="phase">'+heading+'</span><button class="close" data-action="close" aria-label="Close card">×</button></div><div class="overlay-content">'+body+'</div><div class="overlay-footer">'+footer+'</div></div></section>';
 }
+function openCurriculum(id){if(!window.GalaxyCurriculumExperience||!window.GalaxyCurriculumExperience.pilot[id])return;lastActiveButton=document.activeElement;curriculumId=id;curriculumPhase=0;curriculumFrame=0;curriculumChoice='';curriculumRevealed=false;overlay='curriculum';render();focusClose()}
 function openLesson(id){if(!source.byId[id])return;lastActiveButton=document.activeElement;lessonId=id;phase=activateCore('lesson',id);frame=0;revealed=false;decisionDraft='';notesDraft='';overlay='lesson';render();focusClose()}
 function focusClose(){var close=root.querySelector('.close');if(close)close.focus()}
 function openDrill(id){lastActiveButton=document.activeElement;drillTrack=trackById(id).id;drillIndex=activateCore('drill',drillTrack);partner=false;overlay='drill';render();focusClose()}
@@ -251,6 +255,12 @@ root.addEventListener('click',function(e){
  var b=e.target.closest('button');if(!b||!root.contains(b))return;
  var a=b.dataset.action;
  if(!a)return;
+ if(a==='curriculum-open'){openCurriculum(b.dataset.id);return}
+ if(a==='curriculum-frame'){curriculumFrame=Math.min(2,Math.max(0,curriculumFrame+Number(b.dataset.step)));render();return}
+ if(a==='curriculum-choice'){curriculumChoice=String(b.dataset.choice);curriculumRevealed=false;render();return}
+ if(a==='curriculum-reveal'){if(curriculumChoice!==''){curriculumRevealed=true;render()}return}
+ if(a==='curriculum-next'){if(curriculumPhase<2){curriculumPhase++;render()}else{close()}return}
+ if(a==='curriculum-prev'){if(curriculumPhase>0){curriculumPhase--;render()}return}
  if(a==='home'){overlay=null;page='home';render();return}
  if(a==='nav'){if(overlay)close();page=b.dataset.path;queryStatus='';render();return}
   if(a==='resume-core'&&core){var active=core.getState().sessions[b.dataset.id];if(active&&active.playerId===corePlayer()){if(active.module==='lesson')openLesson(active.contentId);if(active.module==='drill')openDrill(active.contentId);if(active.module==='workout')openWorkout((workoutRecord()||{}).mode||'technique')}return}
@@ -277,7 +287,8 @@ root.addEventListener('click',function(e){
 });
 root.addEventListener('change',function(e){
  var t=e.target;
- if(t.id==='playerSelect'){var selected=Number(t.value);player=Number.isInteger(selected)&&selected>=0&&selected<state.names.length?selected:0;persist();overlay=null;render();return}
+ if(t.id==='curriculumDomain'){curriculumDomain=t.value;curriculumBrowseOpen=true;render();return}
+  if(t.id==='playerSelect'){var selected=Number(t.value);player=Number.isInteger(selected)&&selected>=0&&selected<state.names.length?selected:0;persist();overlay=null;render();return}
  if(t.id==='formatSelect'){state.format[player]=t.value==='9'?'9':'11';persist();render();return}
  if(t.id==='appliedCheck'){var r=progress(lessonId);if(t.checked)r.applied=today();else delete r.applied;r.example=(document.getElementById('applicationInput')||{}).value||r.example||'';persist();render();return}
  if(t.id==='drillCheck'){var r2=drillRecord(drillTrack),id=trackById(drillTrack).ids[drillIndex];r2.done=r2.done.filter(function(x){return x!==id});if(t.checked)r2.done.push(id);persist();render();return}
@@ -286,7 +297,8 @@ root.addEventListener('change',function(e){
 });
 root.addEventListener('input',function(e){if(e.target.id==='decisionInput'){decisionDraft=e.target.value;progress(lessonId).decision=decisionDraft;persist()}if(e.target.id==='applicationInput'){notesDraft=e.target.value;progress(lessonId).example=notesDraft;persist()}});
 root.addEventListener('submit',function(e){
- var form=e.target;if(form.id==='planForm'){e.preventDefault();var result=matchPlan(form.elements.request.value);if(!result){queryStatus='Describe a topic to find a session.';render();return}queryStatus=result.info;if(result.page){page=result.page;render()}else{openDrill(result.id)}return}
+ var form=e.target;if(form.id==='curriculumSearchForm'){e.preventDefault();curriculumSearch=String(form.elements.query.value||'').slice(0,100);curriculumBrowseOpen=true;render();return}
+ if(form.id==='planForm'){e.preventDefault();var result=matchPlan(form.elements.request.value);if(!result){queryStatus='Describe a topic to find a session.';render();return}queryStatus=result.info;if(result.page){page=result.page;render()}else{openDrill(result.id)}return}
  if(form.id==='weeklyScheduleForm'&&core){e.preventDefault();var day=Number(form.elements.day.value),kind=form.elements.kind.value;
  var calendar=core.getState().schedule,id=corePlayer(),weekly=(calendar.weekly[id]||[]).filter(function(e){return e.day!==day});
  if(kind!=='none')weekly.push({day:day,kind:kind});core.setSchedule(id,weekly,calendar.dated[id]||[]);render();return}
