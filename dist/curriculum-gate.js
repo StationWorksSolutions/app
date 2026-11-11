@@ -53,9 +53,11 @@ function publicationIssues(l,context){
   if(!object(l.concept)||!filled(l.concept.definition)||/placeholder|to be defined/i.test(l.concept.definition))e.push('approved concept definition');
   if(!object(l.watch)||!arr(l.watch.mediaIds)||!l.watch.mediaIds.length||!arr(l.watch.cues)||l.watch.cues.length<1||l.watch.cues.length>3||!filled(l.watch.observationChallenge))e.push('watch');
   var media=ctx.media||{};
-  if(object(l.watch)&&arr(l.watch.mediaIds))l.watch.mediaIds.forEach(function(mid){
-    if(!mediaUsable(media[mid]))e.push('verified media '+mid);
-  });
+  if(object(l.watch)&&arr(l.watch.mediaIds)){
+    if(!l.watch.mediaIds.some(function(mid){return mediaUsable(media[mid])&&['video','animation'].includes(media[mid].kind)}))
+      e.push('playable video or animation');
+    l.watch.mediaIds.forEach(function(mid){if(!mediaUsable(media[mid]))e.push('verified media '+mid)});
+  }
   var u=l.understand;
   if(!object(u)||!filled(u.situation)||!arr(u.choices)||u.choices.length<2||
     !u.choices.every(function(c){return object(c)&&filled(c.action)&&filled(c.reason)})||
@@ -69,8 +71,11 @@ function publicationIssues(l,context){
   if(!arr(l.assessments)||!l.assessments.length||!l.assessments.every(function(a){return filled(a.question)&&arr(a.options)&&a.options.length>=2&&filled(a.rationale)}))e.push('assessments');
   REVIEW_AREAS.forEach(function(area){if(!validReview(l.reviews&&l.reviews[area],l.contentVersion))e.push('review '+area)});
   if(ctx.lessons){
-    var all=new Set(ctx.lessons.map(idOf));
-    prerequisites(l).forEach(function(id){if(!all.has(id))e.push('missing prerequisite '+id)});
+    var all=new Map(ctx.lessons.map(function(x){return [idOf(x),x]}));
+    prerequisites(l).forEach(function(id){
+      if(!all.has(id))e.push('missing prerequisite '+id);
+      else if(!published(all.get(id),{media:ctx.media,drills:ctx.drills}))e.push('unpublished prerequisite '+id);
+    });
   }
   if(l.demonstratedFormationFormat==='9v9'&&['TT-017','TT-018','TT-025'].includes(id))e.push('formation format');
   return e;
