@@ -223,7 +223,7 @@ function nextLesson(){
  var r=progress(lessonId);
  if(phase===0){r.seen=r.seen||today();phase=1}
  else if(phase===1){r.decision=(document.getElementById('decisionInput')||{}).value||decisionDraft||r.decision||'';phase=2}
- else {r.example=(document.getElementById('applicationInput')||{}).value||notesDraft||r.example||'';persist();completeCore('lesson');close();page='home';render();return}
+ else {r.example=(document.getElementById('applicationInput')||{}).value||notesDraft||r.example||'';persist();completeCore('lesson');close();page='finish';render();return}
  persist();saveCoreCursor(phase);render();
 }
 function updateDateGuard(){return today()}
@@ -243,7 +243,8 @@ root.addEventListener('click',function(e){
  var a=b.dataset.action;
  if(!a)return;
  if(a==='home'){overlay=null;page='home';render();return}
- if(a==='nav'){overlay=null;page=b.dataset.path;queryStatus='';render();return}
+ if(a==='nav'){if(overlay)close();page=b.dataset.path;queryStatus='';render();return}
+  if(a==='resume-core'&&core){var active=core.getState().sessions[b.dataset.id];if(active&&active.playerId===corePlayer()){if(active.module==='lesson')openLesson(active.contentId);if(active.module==='drill')openDrill(active.contentId);if(active.module==='workout')openWorkout((workoutRecord()||{}).mode||'technique')}return}
  if(a==='settings'){page='settings';render();return}
  if(a==='level'){state.level[player]=Number(b.dataset.index);persist();render();return}
  if(a==='lesson'){openLesson(b.dataset.id);return}
@@ -257,8 +258,8 @@ root.addEventListener('click',function(e){
  if(a==='partner'){partner=b.dataset.mode==='partner';render();return}
  if(a==='lesson-next'){nextLesson();return}
  if(a==='lesson-back'){if(phase>0){phase--;render()}return}
- if(a==='drill-move'){var length=trackById(drillTrack).ids.length;var n=drillIndex+Number(b.dataset.step);if(n>=length){if(drillRecord(drillTrack).done.length===length)completeCore('drill');close();return}drillIndex=Math.max(0,n);saveCoreCursor(drillIndex);render();return}
- if(a==='workout-move'){var w=workoutRecord(),next=workoutIndex+Number(b.dataset.step);if(next>=w.items.length){if(isWorkoutDone(w)){w.finished=w.finished||new Date().toISOString();persist();completeCore('workout');close();page='workout';render()}else{workoutIndex=0;while(workoutIndex<w.items.length-1&&slotsFor(w,workoutIndex).every(function(k){return !!w.checks[k]}))workoutIndex++;render()}return}workoutIndex=Math.max(0,next);saveCoreCursor(workoutIndex);render();return}
+ if(a==='drill-move'){var length=trackById(drillTrack).ids.length;var n=drillIndex+Number(b.dataset.step);if(n>=length){if(drillRecord(drillTrack).done.length===length){completeCore('drill');close();page='finish';render()}else{drillIndex=Math.max(0,trackById(drillTrack).ids.findIndex(function(id){return drillRecord(drillTrack).done.indexOf(id)<0}));saveCoreCursor(drillIndex);render()}return}drillIndex=Math.max(0,n);saveCoreCursor(drillIndex);render();return}
+ if(a==='workout-move'){var w=workoutRecord(),next=workoutIndex+Number(b.dataset.step);if(next>=w.items.length){if(isWorkoutDone(w)){w.finished=w.finished||new Date().toISOString();persist();completeCore('workout');close();page='finish';render()}else{workoutIndex=0;while(workoutIndex<w.items.length-1&&slotsFor(w,workoutIndex).every(function(k){return !!w.checks[k]}))workoutIndex++;render()}return}workoutIndex=Math.max(0,next);saveCoreCursor(workoutIndex);render();return}
  if(a==='export'){
   var payload={schema:3,exported:new Date().toISOString(),unified:state,legacy:legacy};
   var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
@@ -278,7 +279,7 @@ root.addEventListener('input',function(e){if(e.target.id==='decisionInput'){deci
 root.addEventListener('submit',function(e){
  var form=e.target;if(form.id==='planForm'){e.preventDefault();var result=matchPlan(form.elements.request.value);if(!result){queryStatus='Describe a topic to find a session.';render();return}queryStatus=result.info;if(result.page){page=result.page;render()}else{openDrill(result.id)}return}
  if(form.id==='settingsForm'){e.preventDefault();state.names=[String(form.elements.name0.value||'Player 1').trim().slice(0,35)||'Player 1',String(form.elements.name1.value||'Player 2').trim().slice(0,35)||'Player 2'];persist();render();return}
- if(form.id==='logForm'){e.preventDefault();var k=player+'|'+today()+'|'+form.elements.kind.value;state.logs[k]={kind:form.elements.kind.value,note:String(form.elements.note.value||'').slice(0,400),date:today(),saved:new Date().toISOString()};persist();page='home';render();return}
+ if(form.id==='logForm'){e.preventDefault();var k=player+'|'+today()+'|'+form.elements.kind.value;state.logs[k]={kind:form.elements.kind.value,note:String(form.elements.note.value||'').slice(0,400),date:today(),saved:new Date().toISOString()};persist();if(core&&form.elements.applied&&form.elements.applied.checked){var pending=Object.values(core.getState().sessions).find(function(s){return s.playerId===corePlayer()&&s.status==='awaiting_match_application'});if(pending){core.recordEvent({playerId:corePlayer(),type:'match_application',sessionId:pending.id,contentId:pending.contentId,details:{activity:form.elements.kind.value,note:state.logs[k].note}});core.transition(pending.id,'ready_for_review',{reviewDue:today()})}}page='progress';render();return}
 });
 document.addEventListener('keydown',function(e){if(!overlay)return;if(e.key==='Escape'){e.preventDefault();close()}else if(overlay==='lesson'&&phase===0&&!/INPUT|TEXTAREA/.test(e.target.tagName)){if(e.key==='ArrowRight'){frame++;render()}if(e.key==='ArrowLeft'){frame--;render()}}});
 var touchStart=null;root.addEventListener('touchstart',function(e){if(!overlay||e.target.closest('button,input,textarea,select,a')){touchStart=null;return}touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
