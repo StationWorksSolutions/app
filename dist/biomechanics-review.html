@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10132a">
+<title>Galaxy Training · Movement Lab (Biomechanics Review)</title>
+<style>
+:root{color-scheme:dark;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090c1a;color:#f7f8ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 60% 0%,#2a205a 0,transparent 52%),#090c1a}
+button{font:inherit;color:inherit;cursor:pointer}button:focus-visible{outline:3px solid #6bcfff;outline-offset:3px}
+.app{max-width:1080px;margin:auto;padding:22px 20px 36px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:24px}.brand{font-weight:950;letter-spacing:.12em;font-size:13px}.brand b{color:#b6a0ff}.label{border:1px solid #595078;border-radius:99px;color:#c5b6ff;background:#242045;padding:7px 11px;font-size:11px;font-weight:850}
+header h1{font-size:clamp(32px,6vw,54px);line-height:1.02;letter-spacing:-.055em;margin:10px 0}header p{color:#bac1db;max-width:590px;line-height:1.5;margin-bottom:20px}.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#9cbbff;font-weight:900}
+.library{display:flex;gap:9px;overflow:auto;padding:5px 2px 15px;scroll-snap-type:x proximity}.pick{flex:0 0 auto;scroll-snap-align:start;text-align:left;border:1px solid #3a3f63;background:#171b32;border-radius:14px;padding:12px 15px;min-width:139px;font-weight:800;font-size:13px}.pick small{display:block;color:#a9b0cf;font-weight:600;font-size:10px;margin-bottom:5px}.pick[aria-pressed=true]{border-color:#ae93ff;background:#322868;box-shadow:0 0 0 1px #ae93ff}
+.lab{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,.8fr);gap:18px;align-items:stretch}
+.stage{background:radial-gradient(ellipse at center,#24275a 0%,#151831 55%,#10142a 100%);border:1px solid #4b4774;border-radius:28px;min-width:0;min-height:580px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.stage-top{padding:19px 20px 0;display:flex;align-items:center;justify-content:space-between;gap:8px}.stage-top h2{font-size:20px;letter-spacing:-.03em;margin:4px 0 0}.stage-top .view{font-size:11px;color:#b4b6d0}
+.figure{flex:1;display:flex;align-items:center;justify-content:center;min-height:330px}.figure svg{display:block;width:100%;height:100%;max-height:465px;max-width:465px;overflow:visible}
+.phasebar{display:flex;gap:6px;padding:0 18px 14px}.phasebar button{flex:1;border:0;background:#303452;border-radius:20px;height:6px;padding:0;min-width:0}.phasebar button.on{background:#aa8eff}.phasebar button[aria-current=true]{box-shadow:0 0 0 3px #989eff44}
+.stage-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px 21px;border-top:1px solid #ffffff18;background:#0e1327b8}
+.stage-bottom span{font-size:13px;font-weight:850}.stage-bottom small{display:block;font-size:11px;font-weight:500;color:#aab4d4;margin-top:4px}.controls{display:flex;gap:8px}
+.control{border:1px solid #605982;background:#292447;border-radius:12px;padding:11px 14px;min-width:71px;font-size:12px;font-weight:850}.control.primary{background:#b19aff;color:#13122d;border:0}
+.side{border:1px solid #36395d;border-radius:26px;background:#171b30;padding:23px;display:flex;flex-direction:column}.side h2{font-size:clamp(25px,3vw,32px);margin:10px 0 13px;letter-spacing:-.035em}.side p{color:#c6cbe2;line-height:1.5;font-size:14px}.cue{font-size:17px!important;font-weight:800;color:white!important;background:#2a2858;border-left:4px solid #aa92ff;border-radius:12px;padding:16px;margin:7px 0 18px}
+.fact{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #353a59;padding:13px 0;font-size:12px}.fact span{color:#aab3d1}.fact strong{text-align:right}
+.status{color:#f7d698;border:1px solid #82734f;border-radius:12px;padding:12px;font-size:12px;line-height:1.45;margin-top:16px}
+.cta{margin-top:auto;width:100%;border:0;border-radius:15px;padding:16px;background:#aa93ff;color:#13132a;font-weight:900}
+.note{font-size:12px;color:#a4adca;line-height:1.55;margin-top:17px}.note a{color:#b3c7ff}
+@media(max-width:710px){.app{padding:16px 13px 35px}.top{margin-bottom:20px}.lab{display:block}.stage{min-height:calc(100svh - 270px);max-height:740px;border-radius:22px}.figure{min-height:290px}.figure svg{max-height:500px}.side{margin-top:15px;border-radius:20px}.library{padding-bottom:12px}.pick{min-width:133px}.stage-top{padding:13px 16px 0}.stage-bottom{padding:12px 13px 14px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+<div class="top"><div class="brand">GALAXY <b>TRAINING</b></div><div class="label">BIOMECHANICS · REVIEW ONLY</div></div>
+<header><div class="eyebrow">Train / Animated movement proof</div><h1>Review the movement.</h1><p>Five motion candidates for technical review. Automated kinematic checks do not establish human safety. None are approved for player instruction.</p></header>
+<nav class="library" id="library" aria-label="Choose movement"></nav>
+<div class="lab">
+<section class="stage" aria-label="Exercise animation">
+<div class="stage-top"><div><div class="eyebrow" id="count">01 / 05</div><h2 id="movement-title">Bodyweight squat</h2></div><span class="view" id="view">SIDE VIEW</span></div>
+<div class="figure"><svg id="figure" viewBox="0 0 360 430" role="img" aria-label="Exercise figure"></svg></div>
+<div class="phasebar" id="phases" aria-label="Animation phases"></div>
+<div class="stage-bottom"><div><span id="phase">Start position</span><small id="phase-hint">Watch the movement slowly.</small></div><div class="controls"><button class="control" id="slow" aria-label="Change animation speed">0.5×</button><button class="control primary" id="play" aria-label="Pause animation">Pause</button></div></div>
+</section>
+<aside class="side"><div class="eyebrow">Coaching focus</div><h2 id="name">Bodyweight squat</h2><p class="cue" id="cue"></p><div class="fact"><span>Movement</span><strong id="pattern"></strong></div><div class="fact"><span>Illustrative dosage</span><strong id="dose"></strong></div><div class="fact"><span>Watch for</span><strong id="risk"></strong></div><div class="fact"><span>Reference evidence</span><strong id="evidence"></strong></div><div class="fact"><span>Development status</span><strong>Not approved for instruction</strong></div><div class="status" role="status"><strong>HOLD — NO PLAYER RELEASE.</strong> STOP: Not reviewed by a qualified youth biomechanics professional. These are technical drafts, not player exercise instructions.</div><button class="cta" id="next">Next movement →</button></aside>
+</div>
+<p class="note">A separate technical review lab. No Galaxy Training player progress is changed. Reduced-motion settings start playback paused. Youth safety context only, not individual animation approval: <a target="_blank" rel="noopener noreferrer" href="https://publications.aap.org/pediatrics/article/145/6/e20201011/76942/">American Academy of Pediatrics</a> and <a target="_blank" rel="noopener noreferrer" href="https://pubmed.ncbi.nlm.nih.gov/39026353/">FIFA 11+ Kids review</a>. Exercise-specific coaching approval is still required.</p>
+</main>
+<script>
+(function(){
+'use strict';
+const REVIEW_GATE=Object.freeze({phase:'technical-draft',referenceVideoCaptured:false,threeDimensionalAnalysis:false,qualifiedBiomechanicsReviewerApproved:false,youthCoachApproved:false,mobileVisualQA:false,publishable:false});
+// Review-only 2D segment rig. No force, 3D joint alignment or risk certification.
+const rad=d=>d*Math.PI/180;
+const P=(x,y,lean,lt,ls,rt,rs,la,lf,ra,rf)=>({x,y,lean,lt,ls,rt,rs,la,lf,ra,rf});
+const M=(t,p)=>({t,p});
+const EXERCISES=[
+{id:'bodyweight-squat',name:'Bodyweight squat',view:'side',pattern:'Squat / knee-dominant',dose:'1–2 × 6–8 controlled reps',cue:'Keep your whole foot grounded. Knees travel in line with your feet.',risk:'Heels lifting or knees collapsing inward',frames:[
+ M(0,P(179,214,0,1,0,0,0,8,-5,5,0)),M(.18,P(169,235,12,39,-18,40,-18,30,10,30,10)),M(.43,P(134,272,27,73,-34,74,-34,52,7,52,7)),M(.56,P(134,272,27,73,-34,74,-34,52,7,52,7)),M(.81,P(169,235,12,39,-18,40,-18,30,10,30,10)),M(1,P(179,214,0,1,0,0,0,8,-5,5,0))]},
+{id:'split-squat',name:'Supported split squat',view:'side',pattern:'Split stance / single-leg strength',dose:'1–2 × 6 each side',cue:'Hold a stable support. Lower straight down; keep the front heel planted.',risk:'Front heel lifting or dropping without control',frames:[
+ M(0,P(181,223,1,34,0,-34,-12,2,0,-2,0)),M(.19,P(181,252,2,55,-15,-54,11,3,0,-3,0)),M(.43,P(181,269,3,65,-21,-64,10,3,0,-3,0)),M(.57,P(181,269,3,65,-21,-64,10,3,0,-3,0)),M(.83,P(181,252,2,55,-15,-54,11,3,0,-3,0)),M(1,P(181,223,1,34,0,-34,-12,2,0,-2,0))]},
+{id:'single-leg-rdl',name:'Single-leg Romanian deadlift',view:'side',pattern:'Hip hinge / balance',dose:'1–2 × 5 each side · unloaded',cue:'Reach your hips back. Keep your back long and the support knee soft.',risk:'Rounding the back or rotating the pelvis',frames:[
+ M(0,P(177,214,1,1,-1,0,0,3,0,-3,0)),M(.2,P(177,215,35,3,-4,-49,-24,0,0,0,0)),M(.44,P(177,217,70,6,-9,-104,-78,2,0,2,0)),M(.57,P(177,217,70,6,-9,-104,-78,2,0,2,0)),M(.82,P(177,215,35,3,-4,-49,-24,0,0,0,0)),M(1,P(177,214,1,1,-1,0,0,3,0,-3,0))]},
+{id:'lateral-bound',name:'Lateral bound and stick',view:'front',pattern:'Sideways landing / deceleration',dose:'3–4 low-amplitude landings each side',cue:'Land softly, bend at the hip and knee, then hold your balance.',risk:'Knee turning inward or uncontrolled landing',frames:[
+ M(0,P(116,234,-9,-7,7,45,-33,44,-38,-18,25)),M(.12,P(126,210,-8,-10,0,33,-29,38,-35,-22,35)),M(.29,P(169,188,0,-24,5,25,-6,-40,22,38,-25)),M(.44,P(231,235,-9,-46,35,7,-7,38,-30,-44,20)),M(.58,P(231,235,-9,-46,35,7,-7,38,-30,-44,20)),M(.72,P(220,207,8,-32,30,9,-3,-25,34,35,-26)),M(.86,P(165,188,0,-22,4,23,-7,-38,25,40,-28)),M(1,P(116,234,-9,-7,7,45,-33,44,-38,-18,25))]},
+{id:'acceleration-start',name:'Acceleration start',loop:false,view:'side',pattern:'Forward lean / first steps',dose:'3–4 × 3 controlled starts · full reset',cue:'Lean from the ankles and push the ground away; avoid reaching forward.',risk:'Overstriding or losing balance on the first step',frames:[
+ M(0,P(141,241,38,45,-27,-51,-22,-38,48,55,-40)),M(.21,P(158,230,37,51,-35,-62,-28,50,-44,-49,47)),M(.41,P(182,204,32,72,-31,-24,-13,-55,35,40,-48)),M(.61,P(209,216,29,37,-21,-61,-34,44,-43,-44,40)),M(.8,P(216,210,30,69,-24,-18,-15,-49,43,38,-50)),M(1,P(216,210,30,69,-24,-18,-15,-49,43,38,-50))]}
+];
+// These source pages explain the MOVEMENT, not validate the SVG asset.
+const REFERENCES=Object.freeze({
+ 'bodyweight-squat':{match:'Exact movement guidance; motion not compared',url:'https://www.acefitness.org/resources/everyone/exercise-library/135/bodyweight-squat/'},
+ 'split-squat':{match:'Partial: unsustained stationary lunge; support hand differs',url:'https://www.mayoclinic.org/healthy-lifestyle/fitness/multimedia/lunge/vid-20084662'},
+ 'single-leg-rdl':{match:'Exact movement guidance; advanced difficulty; age suitability not established',url:'https://www.acefitness.org/resources/everyone/exercise-library/329/single-leg-romanian-deadlift/'},
+ 'lateral-bound':{match:'Exact front-and-side source video missing',url:null},
+ 'acceleration-start':{match:'Exact first-step reference video missing',url:null}
+});
+const SEG={spine:98,thigh:76,shin:70,upperArm:56,forearm:51};
+const phaseNames=['Set up','Initiate','Primary movement','Hold / finish','Controlled return','Loop'];
+const el=id=>document.getElementById(id),svg=el('figure'),library=el('library');
+let active=0,clock=0,last=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,speed=1;
+function interpolate(a,b,k){let out={};for(const key in a){out[key]=a[key]+(b[key]-a[key])*k}return out}
+function poseAt(ex,t){const frames=ex.frames;for(let i=1;i<frames.length;i++){if(t<=frames[i].t){const a=frames[i-1],b=frames[i];let k=(t-a.t)/(b.t-a.t);k=k*k*(3-2*k);return interpolate(a.p,b.p,k)}}return frames[frames.length-1].p}
+function joint(origin,len,angle){return [origin[0]+len*Math.sin(rad(angle)),origin[1]+len*Math.cos(rad(angle))]}
+// Phase B kinematic constraints: planted feet have stable ankle anchors.
+// This enforces 2D segment geometry, NOT biomechanical safety, force or coach approval.
+function anchoredPose(p,exercise){
+ if(!exercise||!['bodyweight-squat','single-leg-rdl','split-squat'].includes(exercise.id))return p;
+ const q={...p};
+ if(exercise.id==='split-squat'){q.x=181;q.y=Math.max(230,p.y);return q}
+ const anchor=exercise.id==='bodyweight-squat'?[180,362]:[178,362];
+ q.x=anchor[0]-(-4+SEG.thigh*Math.sin(rad(p.lt))+SEG.shin*Math.sin(rad(p.ls)));
+ q.y=anchor[1]-SEG.thigh*Math.cos(rad(p.lt))-SEG.shin*Math.cos(rad(p.ls));
+ return q;
+}
+function solveKnee(hip,ankle,choose){
+ const dx=ankle[0]-hip[0],dy=ankle[1]-hip[1],d=Math.hypot(dx,dy);
+ if(d>SEG.thigh+SEG.shin||d<Math.abs(SEG.thigh-SEG.shin)||d===0)throw Error('Unreachable planted joint');
+ const a=(SEG.thigh**2-SEG.shin**2+d*d)/(2*d),v=Math.sqrt(Math.max(0,SEG.thigh**2-a*a));
+ const cx=hip[0]+a*dx/d,cy=hip[1]+a*dy/d;
+ const options=[[cx-v*dy/d,cy+v*dx/d],[cx+v*dy/d,cy-v*dx/d]];
+ return choose==='forward'?options.reduce((a,b)=>a[0]>b[0]?a:b):options.reduce((a,b)=>a[1]>b[1]?a:b);
+}
+function solveElbow(shoulder,hand,upper,forearm){
+ const dx=hand[0]-shoulder[0],dy=hand[1]-shoulder[1],d=Math.hypot(dx,dy);
+ if(d>upper+forearm||d<Math.abs(upper-forearm)||d===0)throw Error('Unreachable support grip');
+ const a=(upper*upper-forearm*forearm+d*d)/(2*d),v=Math.sqrt(Math.max(0,upper*upper-a*a));
+ return [shoulder[0]+a*dx/d+v*dy/d,shoulder[1]+a*dy/d-v*dx/d];
+}
+function skeleton(p,view,exercise){
+ p=anchoredPose(p,exercise);
+ const front=view==='front',h=[p.x,p.y],shoulder=joint(h,-SEG.spine,p.lean),neck=joint(shoulder,-13,p.lean),head=joint(neck,-30,p.lean);
+ const lhip=[p.x-(front?17:4),p.y],rhip=[p.x+(front?17:4),p.y],lsh=[shoulder[0]-(front?25:5),shoulder[1]],rsh=[shoulder[0]+(front?25:5),shoulder[1]];
+ let lk,rk,lankle,rankle;
+ if(exercise&&exercise.id==='split-squat'){
+  // Anchored front and rear feet.
+  lankle=[224,360];rankle=[124,360];
+  lk=solveKnee(lhip,lankle,'forward');rk=solveKnee(rhip,rankle,'down');
+ }else if(exercise&&exercise.id==='bodyweight-squat'){
+  // Two fixed shoes, not one anchored and one sliding.
+  lankle=[180,362];rankle=[186,362];
+  lk=solveKnee(lhip,lankle,'forward');rk=solveKnee(rhip,rankle,'forward');
+ }else{
+  lk=joint(lhip,SEG.thigh,p.lt);rk=joint(rhip,SEG.thigh,p.rt);
+  lankle=joint(lk,SEG.shin,p.ls);rankle=joint(rk,SEG.shin,p.rs);
+ }
+ let le=joint(lsh,SEG.upperArm,p.la),re=joint(rsh,SEG.upperArm,p.ra);
+ let lw=joint(le,SEG.forearm,p.lf),rw=joint(re,SEG.forearm,p.rf);
+ if(exercise&&exercise.id==='split-squat'){
+  // The supporting hand stays in contact with its rail.
+  lw=[185,225];le=solveElbow(lsh,lw,SEG.upperArm,SEG.forearm);
+ }
+ return {h,shoulder,neck,head,lhip,rhip,lsh,rsh,lk,rk,lankle,rankle,le,re,lw,rw};
+}
+function n(x){return Number(x).toFixed(1)}
+function line(a,b,width,color){return '<line x1="'+n(a[0])+'" y1="'+n(a[1])+'" x2="'+n(b[0])+'" y2="'+n(b[1])+'" stroke="'+color+'" stroke-width="'+width+'" stroke-linecap="round"/>'}
+function circ(pt,r,color,stroke='#eef0ff',sw=3){return '<circle cx="'+n(pt[0])+'" cy="'+n(pt[1])+'" r="'+r+'" fill="'+color+'" stroke="'+stroke+'" stroke-width="'+sw+'"/>'}
+function renderFigure(){
+ const m=EXERCISES[active],p=poseAt(m,clock),j=skeleton(p,m.view,m),front=m.view==='front';
+ const blue='#4da8f9',purple='#aa85ff',dark='#54558b',ink='#0b1026';
+ const bones=[['lhip','lk',dark,14],['lk','lankle',dark,12],['rhip','rk',purple,14],['rk','rankle',purple,12],['lsh','le',dark,11],['le','lw',dark,10],['rsh','re',blue,11],['re','rw',blue,10]];
+ let s='<defs><linearGradient id="shirt" x1="0" x2="1"><stop stop-color="#9268ed"/><stop offset="1" stop-color="#559dfa"/></linearGradient></defs>';
+ const ground=front?380:365;s+='<ellipse cx="181" cy="'+(ground+4)+'" rx="132" ry="8" fill="#020517" opacity=".22"/><path d="M22 '+ground+'H338" stroke="#7b81a8" opacity=".7" stroke-width="3" stroke-linecap="round"/>';if(m.id==='split-squat')s+='<rect x="212" y="225" width="9" height="139" rx="4" fill="#6f819f"/><rect x="180" y="221" width="42" height="8" rx="4" fill="#b5c2e6"/>';
+ // Outline preserves the figure's silhouette when limbs overlap.
+ for(const [a,b,c,w] of bones){s+=line(j[a],j[b],w+6,ink)}
+ s+=line(j.h,j.shoulder,25,ink)+line(j.lsh,j.rsh,17,ink);
+ for(const [a,b,c,w] of bones){s+=line(j[a],j[b],w,c)}
+ s+=line(j.h,j.shoulder,19,'url(#shirt)')+line(j.lsh,j.rsh,11,purple);
+ for(const k of ['lhip','rhip','lk','rk','lankle','rankle','lsh','rsh','le','re','lw','rw']){s+=circ(j[k],k==='lk'||k==='rk'?6.5:5.5,k[0]==='l'?dark:purple,ink,2)}
+ // Feet are attached to the ankles and remain visible at small mobile sizes.
+ for(const k of ['lankle','rankle']){let a=j[k];s+=line([a[0]-(front?10:7),a[1]+4],[a[0]+(front?12:27),a[1]+4],10,ink);s+=line([a[0]-(front?10:7),a[1]+3],[a[0]+(front?12:27),a[1]+3],6,k==='lankle'?dark:blue)}
+ s+=circ(j.head,21,ink,'#e5e9ff',4)+circ(j.head,16,'#a78aff','#a78aff',1);
+ const ex=j.head[0]+(front?-6:5),ey=j.head[1]-2;
+ s+='<circle cx="'+n(ex)+'" cy="'+n(ey)+'" r="2.1" fill="#14142a"/>';
+ if(front)s+='<circle cx="'+n(j.head[0]+6)+'" cy="'+n(ey)+'" r="2.1" fill="#14142a"/>';
+ svg.innerHTML=s;
+ svg.setAttribute('aria-label',m.name+' illustrated '+m.view+' view, '+phaseNames[phaseIndex(m,clock)]+'. Technical draft, not instructional.');
+}
+function phaseIndex(m,t){let i=0;for(let k=0;k<m.frames.length-1;k++){if(t>=m.frames[k].t)i=k}return Math.min(5,i)}
+function repaint(){
+ const m=EXERCISES[active],idx=phaseIndex(m,clock);
+ renderFigure();el('phase').textContent=phaseNames[idx];el('phase-hint').textContent='Frame '+(idx+1)+' of '+m.frames.length+' · '+(playing?'Playing':'Paused');
+ [...el('phases').children].forEach((x,i)=>{x.classList.toggle('on',i<=idx);x.setAttribute('aria-current',String(i===idx))});
+ el('play').textContent=playing?'Pause':'Play';el('play').setAttribute('aria-label',playing?'Pause animation':'Play animation');
+ el('slow').textContent=speed===1?'0.5×':'1×';
+}
+function select(i){
+ active=(i+EXERCISES.length)%EXERCISES.length;clock=0;const m=EXERCISES[active];
+ el('count').textContent=String(active+1).padStart(2,'0')+' / 05';el('movement-title').textContent=m.name;el('view').textContent=m.view.toUpperCase()+' VIEW';
+ el('name').textContent=m.name;el('cue').textContent=m.cue;el('pattern').textContent=m.pattern;el('dose').textContent=m.dose;el('risk').textContent=m.risk;
+ const evidence=REFERENCES[m.id],node=el('evidence');
+ node.textContent=evidence.match;
+ if(evidence.url){const a=document.createElement('a');a.href=evidence.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=' · Inspect source';node.appendChild(a);}
+
+ [...library.children].forEach((b,k)=>b.setAttribute('aria-pressed',String(k===active)));
+ el('phases').innerHTML=m.frames.map((f,k)=>'<button title="'+phaseNames[Math.min(5,k)]+'" aria-label="Jump to '+phaseNames[Math.min(5,k)]+'" data-frame="'+k+'"></button>').join('');
+ repaint();
+}
+EXERCISES.forEach((m,i)=>{let b=document.createElement('button');b.className='pick';b.type='button';b.innerHTML='<small>0'+(i+1)+' · '+m.view.toUpperCase()+'</small>'+m.name;b.addEventListener('click',()=>select(i));library.appendChild(b)});
+el('next').addEventListener('click',()=>select(active+1));
+el('play').addEventListener('click',()=>{if(!playing&&clock>=1)clock=0;playing=!playing;last=0;repaint()});
+el('slow').addEventListener('click',()=>{speed=speed===1?.5:1;repaint()});
+el('phases').addEventListener('click',e=>{const b=e.target.closest('[data-frame]');if(!b)return;clock=EXERCISES[active].frames[Number(b.dataset.frame)].t;playing=false;repaint()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){playing=false;repaint()}last=0});
+function tick(now){if(last&&playing){const next=clock+Math.min(60,now-last)*.001*speed/3.1;if(EXERCISES[active].loop===false&&next>=1){clock=1;playing=false}else clock=next%1;repaint()}last=now;requestAnimationFrame(tick)}
+select(0);requestAnimationFrame(tick);
+// Expose read-only inspection API for manual kinematic review and future extraction.
+Object.defineProperty(window,'GALAXY_MOTION_POC',{value:Object.freeze({version:2,gate:REVIEW_GATE,exercises:EXERCISES.map(x=>({id:x.id,name:x.name,status:'technical-draft',publishable:false,requiredViews:x.id==='lateral-bound'||x.id==='single-leg-rdl'?'front-and-side':'side-and-review'})),snapshot:(id,t)=>{const m=EXERCISES.find(x=>x.id===id);return m?{pose:poseAt(m,Math.max(0,Math.min(1,t))),joints:skeleton(poseAt(m,Math.max(0,Math.min(1,t))),m.view,m)}:null}}),writable:false});
+})();
+</script>
+</body></html>
