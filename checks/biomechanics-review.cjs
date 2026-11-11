@@ -18,7 +18,7 @@ function mockEl(id=''){
     addEventListener(name,fn){this.events[name]=fn},
     appendChild(child){this.children.push(child)},
     get innerHTML(){return this._html},
-    set innerHTML(s){this._html=s;if(id==='phases')this.children=Array.from(s.matchAll(/<button/g),()=>mockEl('phase-button'))}
+    set innerHTML(s){this._html=s;this.children=id==='phases'?Array.from(s.matchAll(/<button/g),()=>mockEl('phase-button')):[]}
   };
 }
 const document={
