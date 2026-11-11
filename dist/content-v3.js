@@ -156,5 +156,43 @@ storyboard('gkposition','defend',['A is the goalkeeper, between D and our goal.'
 // Timing example: runner is level/behind D when the pass begins, then arrives beyond.
 for(const id of ['pass','runs','strikercheck','blindside']){const m=lessonPlays[id];m.frames[1].actors={B:[225,105]};m.frames[1].run=[[170,120],[225,105]];m.frames[2].actors={B:[225,65]};m.frames[2].run=[[225,105],[225,65]];m.frames[2].text='A releases while B is onside; B then meets the pass.'}
 
+function escapeHTML(s){return String(s).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
+const liftArt={
+ 'Squat to a chair':{tag:'LEGS',skill:'Stay strong on the ball',cue:'Hips back. Touch the chair. Stand tall.',prop:'chair'},
+ 'Dumbbell floor press':{tag:'UPPER BODY',skill:'Build pushing strength',cue:'Lower gently. Press up. Keep control.',prop:'weights'},
+ 'Supported one-arm row':{tag:'UPPER BODY',skill:'Strong posture in a duel',cue:'Back still. Pull toward your hip.',prop:'row'},
+ 'Glute bridge':{tag:'HIPS',skill:'Control your hips',cue:'Squeeze. Lift. Keep your ribs down.'},
+ 'Suitcase hold':{tag:'CORE',skill:'Stay upright under pressure',cue:'Stand tall. Hold still. No leaning.',prop:'carry'},
+ 'Supported split squat':{tag:'LEGS',skill:'Balance on each leg',cue:'Hold support. Lower straight down.',prop:'support'},
+ 'Incline push-up':{tag:'UPPER BODY',skill:'A strong, steady body',cue:'Body straight. Lower your chest. Push away.',prop:'bench'},
+ 'Calf raise':{tag:'LOWER LEGS',skill:'Control through your ankles',cue:'Rise onto your toes. Lower slowly.',prop:'support'},
+ 'Dead bug heel taps':{tag:'CORE',skill:'Keep your body controlled',cue:'Tap one heel. Keep your back quiet.'},
+};
+// Fixed-length, joint-based figures: upper/lower arms 24, thighs/shins 32, torso 38.
+// Side views use a translucent far limb; no limb is stretched between frames.
+function bendJoint(a,b,length,side=1){const dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy);if(d>length*2+0.001||d<0.001)throw Error('Unreachable illustration joint');const h=Math.sqrt(Math.max(0,length*length-d*d/4));return [(a[0]+b[0])/2-side*dy/d*h,(a[1]+b[1])/2+side*dx/d*h]}
+function bodyPose(hip,angle,ankles,hands,legBends=[-1,-1],armBends=[1,1],head){const shoulder=[hip[0]+38*Math.cos(angle),hip[1]+38*Math.sin(angle)];return {hip,shoulder,head:head||[shoulder[0]+16*Math.cos(angle),shoulder[1]+16*Math.sin(angle)],legs:ankles.map((a,i)=>[hip,bendJoint(hip,a,32,legBends[i]),a]),arms:hands.map((h,i)=>[shoulder,bendJoint(shoulder,h,24,armBends[i]),h])}}
+const up=-Math.PI/2;
+const standing=(lift=0)=>{const shift=Math.sqrt(187)-Math.sqrt(196-(3+lift)**2);return bodyPose([80+shift,94-lift],up,[[75+shift,155-lift],[85+shift,155-lift]],[[48,78],[91+shift,99-lift]],[-1,-1],[1,-1])};
+const press=(raised)=>bodyPose([94,147],Math.PI,[[137,155],[143,155]],raised?[[56,99],[62,100]]:[[80,123],[83,125]],[-1,-1],[1,1]);
+const bridgeU=[Math.sqrt(1-.35*.35),-.35],bridgeShoulder=[42,147],bridgeAnkle=[42+70*bridgeU[0],154.5];
+const bridge=(raised)=>{const hip=raised?[42+38*bridgeU[0],147+38*bridgeU[1]]:[80,147];return bodyPose(hip,raised?Math.atan2(-bridgeU[1],-bridgeU[0]):Math.PI,[bridgeAnkle,[bridgeAnkle[0]+4,154.5]],[[89,151],[88,153]],[-1,-1],[-1,-1],[26,147])};
+const push=(slope)=>{const u=[Math.sqrt(1-slope*slope),slope],ankle=[150,155],hip=[150-64*u[0],155-64*u[1]];return bodyPose(hip,Math.atan2(-u[1],-u[0]),[ankle,ankle],[[40,120],[40,120]],[-1,-1],[-1,-1])};
+const dead=(tap)=>{const p=bodyPose([94,147],Math.PI,[[126,115],tap?[151,155]:[126,115]],[[56,99],[62,100]],[-1,-1],[1,1]);if(!tap)p.legs=p.legs.map(()=>[[94,147],[94,115],[126,115]]);else p.legs[0]=[[94,147],[94,115],[126,115]];return p};
+liftArt['Squat to a chair'].rigs=[bodyPose([80,94],up,[[88,155],[92,155]],[[113,71],[117,73]]),bodyPose([60,119],-1.12,[[88,155],[92,155]],[[118,77],[120,80]])];
+liftArt['Dumbbell floor press'].rigs=[press(false),press(true)];
+liftArt['Supported one-arm row'].rigs=[bodyPose([110,99],-2.75,[[99,155],[139,155]],[[45,113],[75,132]],[-1,-1],[1,-1]),bodyPose([110,99],-2.75,[[99,155],[139,155]],[[45,113],[100,109]],[-1,-1],[1,-1])];
+liftArt['Glute bridge'].rigs=[bridge(false),bridge(true)];
+liftArt['Suitcase hold'].rigs=[bodyPose([80,94],up,[[73,155],[87,155]],[[67,101],[93,101]]),bodyPose([80,94],up,[[73,155],[87,155]],[[67,101],[93,101]])];
+liftArt['Supported split squat'].rigs=[bodyPose([80,105],up,[[48,155],[118,148]],[[45,84],[92,112]],[1,1],[1,-1]),bodyPose([80,125],up,[[48,155],[118,148]],[[45,84],[92,132]],[1,1],[1,-1])];
+liftArt['Incline push-up'].rigs=[push(.65),push(.45)];
+liftArt['Calf raise'].rigs=[standing(),standing(8)];
+liftArt['Dead bug heel taps'].rigs=[dead(false),dead(true)];
+Object.values(liftArt).forEach(a=>delete a.poses);
+function exerciseGraphic(name){const art=liftArt[name];const points=p=>p.map(q=>q.map(n=>n.toFixed(2)).join(',')).join(' ');const path=(p,color,w,extra='')=>`<polyline points="${points(p)}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;const dumb=p=>`<g stroke="#83bdff" stroke-width="4"><path d="M${p[0]-8} ${p[1]}h16 M${p[0]-8} ${p[1]-5}v10 M${p[0]+8} ${p[1]-5}v10"/></g>`;
+const figure=(p,i)=>{let prop='';if(art.prop==='chair')prop='<path d="M36 125H65 M39 125V158 M62 125V158 M36 125V100"/>';if(art.prop==='row')prop='<path d="M26 117H57 M30 117V158 M53 117V158"/>';if(art.prop==='bench')prop='<path d="M15 124H48 M19 124V158 M45 124V158"/>';if(art.prop==='support')prop=name==='Calf raise'?'<path d="M28 81H52 M32 81V158"/>':'<path d="M28 87H51 M32 87V158"/>';
+const feet=p.legs.map((l,j)=>{const a=l[2];const tip=name==='Calf raise'?[a[0]+Math.sqrt(196-(158-a[1])**2),158]:name==='Supported split squat'&&j===1?[128,158]:[a[0]+10,a[1]+3];return path([a,tip],j?'#fff':'#9b91bc',5)}).join('');
+return `<g transform="translate(${i*190},8)"><path d="M12 159H177" stroke="#fff" opacity=".25"/><g stroke="#829bc8" stroke-width="4" fill="none" stroke-linecap="round">${prop}</g>${path(p.legs[0],'#9286b0',6)}${path(p.arms[0],'#9286b0',5)}${path([p.hip,p.shoulder],'#ad7bff',10)}${path([p.shoulder,p.head],'#fff',4)}<circle cx="${p.head[0]}" cy="${p.head[1]}" r="8" fill="#fff"/>${path(p.legs[1],'#fff',6)}${path(p.arms[1],'#fff',5)}${feet}${[p.hip,p.shoulder,...p.legs.map(l=>l[1]),...p.arms.map(l=>l[1])].map(q=>`<circle cx="${q[0]}" cy="${q[1]}" r="2.5" fill="#447cff"/>`).join('')}${art.prop==='weights'?p.arms.map(l=>dumb(l[2])).join(''):art.prop==='row'?dumb(p.arms[1][2]):art.prop==='carry'?dumb(p.arms[i][2]):''}</g>`};return `<svg viewBox="0 0 380 193" role="img" aria-label="${escapeHTML(name+': '+art.cue)}">${art.rigs.map(figure).join('')}<path d="M180 85h17 m-5 -5 5 5 -5 5" stroke="#83bdff" fill="none" stroke-width="2"/><text x="90" y="187" text-anchor="middle">${art.prop==='carry'?'HOLD':'START'}</text><text x="280" y="187" text-anchor="middle">${art.prop==='carry'?'SWITCH HANDS':'MOVE'}</text></svg>`}
+
 const lessonById=Object.fromEntries(lessons.map(item=>[item.id,item]));
-window.GALAXY_CONTENT=Object.freeze({lessons,byId:lessonById,levels:iqLevels,plays:lessonPlays,demos:demoCatalog,positions:positionPaths,formations});
+window.GALAXY_CONTENT=Object.freeze({lessons,byId:lessonById,levels:iqLevels,plays:lessonPlays,demos:demoCatalog,positions:positionPaths,formations,liftArt,exerciseGraphic});
