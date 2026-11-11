@@ -84,7 +84,7 @@ for(const key of Object.keys(counts)){
  assert.deepEqual(new Set(full.filter(l=>l.domainCode===key).map(l=>l.level)),
    new Set(['beginner','developing','advanced','mastery']),key+' pathway levels');
 }
-assert.deepEqual(curriculum.publishedLessons(full,{}),[],'250 drafts cannot be released automatically');
+assert.equal(curriculum.publishedLessons(full,{}).length,0,'250 drafts cannot be released automatically');
 assert.ok(experience.roadmapHTML('', 'all', false).includes('250 sequenced learning objectives'));
 assert.ok(experience.roadmapHTML('press', 'TR', true).includes('curriculum-result'));
 assert.ok(experience.roadmapHTML('<script>', 'all', true).includes('&lt;script&gt;'),'search term escaped');
