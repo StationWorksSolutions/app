@@ -98,4 +98,23 @@ assert.match(root.innerHTML,/checked/);
 assert.ok(storage['galaxy-training-v1']===JSON.stringify(old),'legacy records untouched');
 assert.match(css,/\.overlay/);
 assert.match(css,/\.home-grid/);
+
+for(const name of Object.keys(source.liftArt)){
+ const graphic=source.exerciseGraphic(name);
+ assert.match(graphic,/<svg/,'missing illustration '+name);
+ assert.ok(!graphic.includes('NaN')&&!graphic.includes('undefined'),'bad illustration '+name);
+}
+for(const mode of ['build','technique']){const plan=app.getPlan(mode);assert.equal(new Set(plan).size,plan.length,'repeated movement in '+mode)}
+const firstWorkout=app.getState().workouts[Object.keys(app.getState().workouts)[0]];
+for(const slot of app.slotsFor(firstWorkout,0)){firstWorkout.checks[slot]=true}
+assert.equal(app.completedExercises(firstWorkout),1,'fully checked movement counts once');
+delete firstWorkout.checks[app.slotsFor(firstWorkout,0)[0]];
+assert.equal(app.completedExercises(firstWorkout),0,'undo does not falsely complete movement');
+click({action:'close'});
+root.listeners.change({target:{id:'playerSelect',value:'1',dataset:{}}});
+assert.equal(app.getState().active,1,'second player selected');
+assert.ok(!Object.keys(app.getState().workouts).some(k=>k.startsWith('1|')),'new player workout separate');
+root.listeners.change({target:{id:'playerSelect',value:'0',dataset:{}}});
+assert.equal(app.getState().active,0,'first player resumed');
+
 console.log('PASS v3: content integrity, 36 storyboards, source URLs, legacy preservation, 3-path navigation, lesson lifecycle, drills, 8–10 movement plans, persistence and resume. DOM mock only; mobile/browser QA pending.');
