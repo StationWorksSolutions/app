@@ -186,3 +186,32 @@ No production merge or production deployment is authorized in this plan.
 - American Academy of Pediatrics. *Resistance Training for Children and Adolescents* (2020, reaffirmed November 2024): https://publications.aap.org/pediatrics/article/145/6/e20201010/76942/
 - NSCA. *Youth Resistance Training* position statement: https://www.nsca.com/globalassets/about/position-statements/position_stand_youth_resistance_training---2009.pdf
 - FIFA 11+ Kids systematic review: https://pubmed.ncbi.nlm.nih.gov/39026353/
+
+## Cross-workstream architecture reconciliation — 2026-11-11
+
+The independent core application workstream now includes branch `feature/galaxy-core-foundation-20261111` and its `dist/core-foundation.js` API, described in `CORE_ARCHITECTURE.md`.
+
+**This section supersedes the earlier proposed `physical` subtree under v3 as the durable shared writer.** That subtree remains a possible private migration staging area but must **not** become a competing session or progress store. The physical module should expose pure versioned content, prescribed workout snapshots and movement review metadata, and integrate through the **shared core-owned** state when that branch is approved.
+
+- Preserve source-of-truth `galaxy-training-unified-v3` and `galaxy-training-v1` storage without destructive migration. The core workstream currently creates transitional sidecar `galaxy-training-core-v1`; it is **not yet a deployed unified progress implementation**.
+- In an integration adapter, use `core.playerIdForLegacyIndex(0)` for Jay and `(1)` for James, rather than child names or browser-index keys. New profiles use stable IDs from core.
+- Convert presentation-focused physical exercise records into core's narrow `{schemaVersion:1,id,title,animation:{assetId,kind:'animation'}|null}` contract without losing the richer canonical catalog fields. Convert a prescribed workout into `{schemaVersion:1,id,items:[{exerciseId,sets,reps}]}` for `Core.validateWorkout`. The exercise library and dose rules remain owned by this workstream.
+- Use `core.createSession({playerId,module:'workout',contentId,contentVersion})`, `core.transition`, `core.setCursor`, `core.recordEvent`, and `core.resumable` for shared session lifecycle. Set events should include immutable `sessionId`, `exerciseId`, `side`, `setIndex`, `completedAt`, and an idempotency identifier, without logging completion twice.
+- Keep private immutable workout snapshots and prescribed sets at a module-defined versioned store **linked by core session IDs**. Coordinate backup/export of both stores and error propagation before enabling progress in the shared shell; no silent progress loss on failed writes.
+- The core's `competency_verified` event requires an independent reviewer and evidence. Exercise completion and self-reported familiarity must not emit that event.
+- Schedule queries from the core calendar must drive recovery recommendations; do not hardcode match/futsal participation or schedule dates.
+- Merge sequence: **review POC → approve core foundation → reconcile adapters → migration/restore tests → unified player shell preview → production approval**. This motion branch must not copy or modify `dist/core-foundation.js` or the core shell in isolation.
+
+### Movement-specific Phase B acceptance checks
+
+The current preview enforces constant 2D segment lengths and **planted ankle anchors** for the squat, supported split squat and single-leg RDL. Ankle anchoring is a **geometric visual constraint only**; it does not demonstrate heel pressure, balance forces, sagittal/frontal-plane alignment, or correct coaching mechanics.
+
+| Movement | Automated geometry | Qualified reviewer visual gate | Instructional fallback |
+| --- | --- | --- | --- |
+| Bodyweight squat | Both segment lengths; one foot anchor in side view | Check both heels, frontal knee tracking, trunk/spine relationship, ascent tempo | Verified squat video until front and side review |
+| Supported split squat | Two-foot ankle anchoring via fixed-length inverse kinematics | Check stable support grip, stance width, knee path, rear knee clearance and pelvic control | Verified supported-split-squat video |
+| Single-leg RDL | Planted stance ankle; two-bone segment lengths | Check pelvic rotation, spine line, front and side balance, trailing leg | Verified supported-hinge video |
+| Lateral bound | Consistent limb lengths and flight/landing phases | Check no knee valgus, hip/knee bend, actual one-leg stabilization, safe surface | Low side-step-and-stick or verified landing video |
+| Acceleration start | Segment lengths and end-hold (no false seamless gait loop) | Check forward lean from ankles, first foot placement, torso timing, actual force vectors not inferable in 2D | Verified youth acceleration demonstration |
+
+No exercise is accepted merely because the SVG renders, automated test geometry passes, or a guideline is cited. Coach evidence should be stored with a reviewer name, date, reference video, verdict and revision number. The release remains blocked until the first five movements meet these criteria.
