@@ -60,8 +60,8 @@
     function legacyProfiles(state){
       var names=state&&Array.isArray(state.names)?state.names:['Jay','James'];
       names.forEach(function(name,index){
-        var id='legacy-'+index,p=doc.profiles.find(function(x){return x.id===id});
-        if(!p)doc.profiles.push({id:id,name:String(name||'Player '+(index+1)).slice(0,35),positions:[]});
+        var p=doc.profiles[index];
+        if(!p){p={id:'legacy-'+index,name:String(name||'Player '+(index+1)).slice(0,35),positions:[]};doc.profiles.push(p)}
         else if(nonempty(name))p.name=String(name).slice(0,35);
       });
       if(!doc.activePlayerId||!doc.profiles.some(function(x){return x.id===doc.activePlayerId}))
