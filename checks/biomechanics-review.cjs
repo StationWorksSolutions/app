@@ -12,7 +12,7 @@ assert.doesNotMatch(script[1], /localStorage|sessionStorage|fetch\s*\(/, 'previe
 
 const elements = new Map();
 function mockEl(id=''){
-  return {id,children:[],events:{},attributes:{},textContent:'',_html:'',
+  return {id,children:[],events:{},attributes:{},_text:'',get textContent(){return this._text},set textContent(v){this._text=v;this.children=[]},_html:'',
     classList:{toggle(){}},
     setAttribute(k,v){this.attributes[k]=v},
     addEventListener(name,fn){this.events[name]=fn},
