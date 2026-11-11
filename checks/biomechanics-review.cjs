@@ -91,4 +91,18 @@ for(const id of expected){
 const landed=api.snapshot('lateral-bound',.5).joints;
 assert.ok(Math.abs(landed.rankle[1]-380)<14,'lateral landing hold must be near ground contact');
 assert.match(api.exercises.find(x=>x.id==='single-leg-rdl').requiredViews,/front/);
+// References are evidence candidates, never treated as approval of an SVG.
+elements.get('library').children[0].events.click();
+assert.match(elements.get('evidence').textContent,/Exact movement guidance/);
+assert.equal(elements.get('evidence').children[0].href,'https://www.acefitness.org/resources/everyone/exercise-library/135/bodyweight-squat/');
+elements.get('library').children[1].events.click();
+assert.match(elements.get('evidence').textContent,/Partial/);
+elements.get('library').children[2].events.click();
+assert.match(elements.get('evidence').textContent,/advanced difficulty/);
+elements.get('library').children[3].events.click();
+assert.match(elements.get('evidence').textContent,/source video missing/);
+assert.equal(elements.get('evidence').children.length,0,'no false cited reference for lateral bound');
+elements.get('library').children[4].events.click();
+assert.match(elements.get('evidence').textContent,/reference video missing/);
+assert.equal(api.gate.publishable,false,'source listing never clears release gate');
 console.log('PASS review rig: 5 drafts, fixed limb lengths, anchored shoes/grip, 505 sampled frames, reduced motion, fail-closed approval state. Qualified movement validation remains pending.');
