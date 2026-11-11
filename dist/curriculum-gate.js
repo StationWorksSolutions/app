@@ -51,7 +51,7 @@ function publicationIssues(l,context){
   if(!filled(id)||!filled(l.title)||!filled(l.objective)||!filled(l.contentVersion))e.push('identity/version');
   if(!arr(l.positionTags)||!l.positionTags.length||!arr(prerequisites(l)))e.push('position/prerequisites');
   if(!object(l.concept)||!filled(l.concept.definition)||/placeholder|to be defined/i.test(l.concept.definition))e.push('approved concept definition');
-  if(!object(l.watch)||!arr(l.watch.mediaIds)||!l.watch.mediaIds.length||!arr(l.watch.cues)||l.watch.cues.length>3||!filled(l.watch.observationChallenge))e.push('watch');
+  if(!object(l.watch)||!arr(l.watch.mediaIds)||!l.watch.mediaIds.length||!arr(l.watch.cues)||l.watch.cues.length<1||l.watch.cues.length>3||!filled(l.watch.observationChallenge))e.push('watch');
   var media=ctx.media||{};
   if(object(l.watch)&&arr(l.watch.mediaIds))l.watch.mediaIds.forEach(function(mid){
     if(!mediaUsable(media[mid]))e.push('verified media '+mid);
@@ -81,7 +81,8 @@ function eligible(catalog,ctx,completed,positions){
   var ready=new Set(completed||[]),roles=new Set(positions||[]);
   return publishedLessons(catalog,ctx).filter(function(l){
     var tags=l.positionTags||[];
-    var relevant=!roles.size||tags.includes('OUT')||tags.some(function(t){return roles.has(t)});
+    var outfield=Array.from(roles).some(function(role){return role!=='GK'});
+    var relevant=!roles.size||(outfield&&tags.includes('OUT'))||tags.some(function(t){return roles.has(t)});
     return relevant&&!ready.has(idOf(l))&&prerequisites(l).every(function(p){return ready.has(p)});
   });
 }
