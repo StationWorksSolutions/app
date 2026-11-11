@@ -78,48 +78,33 @@ assert.match(root.innerHTML,/DRILLS \/ BALL LAB/);
 assert.match(root.innerHTML,/With a partner/);
 click({action:'close'});
 click({action:'nav',path:'workout'});
-assert.match(root.innerHTML,/8 MOVEMENTS/);
-assert.match(root.innerHTML,/10 MOVEMENTS/);
+assert.match(root.innerHTML,/Workouts temporarily unavailable/);
+assert.match(root.innerHTML,/Exercise demonstrations are being reviewed/);
+assert.ok(!root.innerHTML.includes('data-action="choose-workout"'),'no exercise start CTA');
+assert.ok(!root.innerHTML.includes('data-action="start-workout"'),'no resume CTA while media unverified');
+assert.equal(source.exerciseGraphic,undefined,'unsafe artwork generator must not be exported');
+assert.equal(source.liftArt,undefined,'unsafe artwork must not be published');
 const build=app.getPlan('build'),easy=app.getPlan('technique');
 assert.equal(build.length,10);
 assert.equal(easy.length,8);
-for(const name of [...build,...easy])assert.ok(name&&name.length>2,'exercise name');
 assert.equal(app.matchPlan('I want a winger plan').id,'wide');
 assert.equal(app.matchPlan('first touch and passing').id,'first');
 assert.equal(app.matchPlan('more strength').page,'workout');
+assert.equal(Object.keys(app.getState().workouts).length,0);
 click({action:'choose-workout',mode:'build'});
-assert.match(root.innerHTML,/WORKOUT \/ MOVEMENT/);
-let w=Object.values(app.getState().workouts)[0];
-assert.equal(w.items.length,10);
-assert.equal(w.mode,'build');
-assert.ok(app.slotsFor(w,0).length>=2);
-assert.equal(app.completedExercises(w),0);
-const first=app.slotsFor(w,0)[0];
-root.listeners.change({target:{dataset:{set:first},checked:true,id:''}});
-assert.ok(app.getState().workouts[Object.keys(app.getState().workouts)[0]].checks[first]);
-click({action:'close'});
 click({action:'start-workout'});
-assert.match(root.innerHTML,/checked/);
+click({action:'workout-move',step:'1'});
+root.listeners.change({target:{dataset:{set:'0:1:'},checked:true,id:''}});
+assert.equal(Object.keys(app.getState().workouts).length,0,'blocked exercise actions cannot write records');
+assert.ok(!root.innerHTML.includes('role="dialog"'),'exercise overlay never opens');
 assert.ok(storage['galaxy-training-v1']===JSON.stringify(old),'legacy records untouched');
 assert.match(css,/\.overlay/);
-assert.match(css,/\.home-grid/);
-
-for(const name of Object.keys(source.liftArt)){
- const graphic=source.exerciseGraphic(name);
- assert.match(graphic,/<svg/,'missing illustration '+name);
- assert.ok(!graphic.includes('NaN')&&!graphic.includes('undefined'),'bad illustration '+name);
-}
-for(const mode of ['build','technique']){const plan=app.getPlan(mode);assert.equal(new Set(plan).size,plan.length,'repeated movement in '+mode)}
-const firstWorkout=app.getState().workouts[Object.keys(app.getState().workouts)[0]];
-for(const slot of app.slotsFor(firstWorkout,0)){firstWorkout.checks[slot]=true}
-assert.equal(app.completedExercises(firstWorkout),1,'fully checked movement counts once');
-delete firstWorkout.checks[app.slotsFor(firstWorkout,0)[0]];
-assert.equal(app.completedExercises(firstWorkout),0,'undo does not falsely complete movement');
-click({action:'close'});
+click({action:'nav',path:'progress'});
+assert.match(root.innerHTML,/Participation is not the same as demonstrated skill competency/);
 root.listeners.change({target:{id:'playerSelect',value:'1',dataset:{}}});
 assert.equal(app.getState().active,1,'second player selected');
-assert.ok(!Object.keys(app.getState().workouts).some(k=>k.startsWith('1|')),'new player workout separate');
+assert.ok(!Object.keys(app.getState().workouts).some(k=>k.startsWith('1|')),'player history still isolated');
 root.listeners.change({target:{id:'playerSelect',value:'0',dataset:{}}});
 assert.equal(app.getState().active,0,'first player resumed');
 
-console.log('PASS v3: current content, four-tab shell, session completion, player isolation and legacy regression checks. DOM mock only; mobile/browser QA pending.');
+console.log('PASS v3: core flow, player isolation, unreviewed exercise lockout and legacy records. DOM mock only; device QA pending.');

@@ -103,7 +103,7 @@ function homeHTML(){
 function trainHTML(){
  return '<section class="intro"><p class="eyebrow">TRAIN</p><h1>Practice with purpose.</h1><p class="lead">Choose a training type, or return to Today for your recommendation.</p></section>'+
  '<div class="training-choices"><button class="listcard" data-action="nav" data-path="drills"><span class="meta">FIELD</span><h2>Soccer drills</h2><span>Ball work and decisions →</span></button>'+
- '<button class="listcard" data-action="nav" data-path="workout"><span class="meta">PHYSICAL</span><h2>Workouts</h2><span>Strength and coordination →</span></button></div>';
+ '<button class="listcard" data-action="nav" data-path="workout"><span class="meta">PHYSICAL</span><h2>Workouts</h2><span>Technique review in progress →</span></button></div>';
 }
 function progressHTML(){
  var prefix=player+'|',keys=Object.keys(state.lessons).filter(function(k){return k.indexOf(prefix)===0});
@@ -155,10 +155,12 @@ function slotsFor(w,index){var name=w.items[index],sets=w.mode==='technique'?1:2
 function completedExercises(w){return w.items.filter(function(name,i){return slotsFor(w,i).every(function(k){return !!w.checks[k]})}).length}
 function isWorkoutDone(w){return w&&completedExercises(w)===w.items.length}
 function workoutHTML(){
- var w=workoutRecord();var status=w?'<section class="panel"><p class="eyebrow">SAVED '+esc(w.date)+'</p><h2>'+(isWorkoutDone(w)?'Workout complete':'Continue your workout')+'</h2><p>'+completedExercises(w)+' / '+w.items.length+' movements complete · '+(w.mode==='build'?'Build':'Technique')+' session</p><div class="progressline"><span style="width:'+Math.round(completedExercises(w)/w.items.length*100)+'%"></span></div><button class="primary" data-action="start-workout"> '+(isWorkoutDone(w)?'Review completed workout':'Resume workout')+' →</button></section>':'';
- return '<section class="intro"><p class="eyebrow">WORKOUT / MOVEMENT</p><h1>Strong movement. Better control.</h1><p class="lead">Eight to ten movements per session. Use controlled technique, not maximum loads. An adult should supervise weighted exercises.</p></section>'+status+
- (!w?'<div class="lesson-list"><button class="listcard" data-action="choose-workout" data-mode="technique"><span class="meta">8 MOVEMENTS · 1 SET</span><h3>Technique</h3><p>Practice movement patterns with less load. Suitable for practice days or lower-energy days.</p><span class="go">Start technique →</span></button><button class="listcard" data-action="choose-workout" data-mode="build"><span class="meta">10 MOVEMENTS · 2 SETS</span><h3>Build</h3><p>Balanced legs, upper body, trunk, and control. Rest when form slips.</p><span class="go">Start build →</span></button></div>':'')+
- '<div class="notice">Rest is part of development. On match days, after hard team practice, or with pain, skipping extra training can be the right choice. Stop if movement hurts.</div>';
+ var past=Object.keys(state.workouts).filter(function(k){return k.indexOf(player+'|')===0}).length;
+ return '<section class="intro"><p class="eyebrow">TRAIN / PHYSICAL</p><h1>Workouts temporarily unavailable.</h1>'+
+ '<p class="lead">Exercise demonstrations are being reviewed for safe, age-appropriate technique. Do not follow the previous stick-figure illustrations. Independent workouts will return only after the movement demonstrations pass a qualified review.</p></section>'+
+ '<section class="panel" role="status"><h2>Movement safety review</h2><p>Strength sessions cannot be started or resumed in this preview until verified instructional media is integrated.</p>'+
+ '<p class="caption">'+past+' earlier workout record(s) remain saved on this device. Their progress has not been deleted.</p>'+
+ '<button class="button" data-action="nav" data-path="train">Back to Train</button></section>';
 }
 function scheduleHTML(){
  if(!core)return '';
@@ -182,7 +184,7 @@ function settingsHTML(){
 function render(){
  root.innerHTML=navHTML()+'<main class="shell">'+(page==='home'?homeHTML():page==='learn'?learnHTML():page==='train'?trainHTML():page==='progress'?progressHTML():page==='log'?logHTML():page==='finish'?finishHTML():page==='drills'?drillsHTML():page==='workout'?workoutHTML():settingsHTML())+'</main>'+(overlay?overlayHTML():'');
  document.body.style.overflow=overlay?'hidden':'';
- if(overlay==='workout'&&source.exerciseGraphic&&source.liftArt){var w=workoutRecord(),name=w&&w.items[workoutIndex],art=root.querySelector('.cardart');if(art&&source.liftArt[name]){art.innerHTML=source.exerciseGraphic(name);art.setAttribute('aria-label',name+' movement illustration')}}
+
 }
 function diagram(l){
  var m=source.plays[l.id];if(!m)return '<div class="notice">Use the question and coached explanation for this concept.</div>';
@@ -211,28 +213,20 @@ function drillHTML(){
  var t=trackById(drillTrack),id=t.ids[drillIndex],l=source.byId[id],r=drillRecord(t.id),done=r.done.indexOf(id)>=0;
  return '<p class="eyebrow">'+esc(t.title)+' / '+(drillIndex+1)+' OF '+t.ids.length+'</p><h1>'+esc(l.title)+'</h1><p class="big-cue">'+esc((l.cues||[])[0]||l.title)+'</p><div class="metrics"><span>2–4 quality rounds</span><span>Short rest as needed</span></div><div class="practice-steps"><div class="option-row"><button data-action="partner" data-mode="solo" aria-pressed="'+(!partner)+'">Solo</button><button data-action="partner" data-mode="partner" aria-pressed="'+partner+'">With a partner</button></div><p>'+esc(partner?l.duo:l.solo)+'</p><p class="caption">Start slowly, then add movement or gentle pressure once the decision stays clear.</p><details><summary>Why this drill</summary><p>'+esc(l.why)+'</p><p>'+esc(l.mistake||'')+'</p></details>'+demo(l)+'</div><label class="toggle"><input type="checkbox" id="drillCheck" '+(done?'checked':'')+'> Practiced this drill today</label>';
 }
-function workoutHTMLCard(){
- var w=workoutRecord(),name=w.items[workoutIndex],m=moves[name],slots=slotsFor(w,workoutIndex),done=slots.filter(function(k){return !!w.checks[k]}).length;
- var rows=slots.map(function(k){var parts=k.split(':'),set=parts[1],side=parts[2];return '<div class="set-item"><label><input type="checkbox" data-set="'+esc(k)+'" '+(w.checks[k]?'checked':'')+'><span>Set '+set+(side?' · '+(side==='L'?'Left':'Right'):'')+'</span></label><span class="chip">'+esc(m.reps)+'</span></div>'}).join('');
- var d=source.demos[m.demo],href=d&&safeUrl(d.url);
- return '<p class="eyebrow">'+(w.mode==='build'?'BUILD':'TECHNIQUE')+' / MOVEMENT '+(workoutIndex+1)+' OF '+w.items.length+'</p><h1>'+esc(name)+'</h1><div class="metrics"><span>'+esc(m.reps)+'</span><span>'+(w.mode==='build'?'2 controlled sets':'1 learning set')+'</span><span>'+done+' / '+slots.length+' checked</span></div>'+
- '<div class="cardart" role="img" aria-label="Movement reminder"><svg viewBox="0 0 360 155"><circle cx="97" cy="30" r="15" fill="#d6dffe"/><path d="M97 46 L97 104 M97 63 L61 89 M97 63 L135 83 M97 103 L75 135 M97 103 L128 135" fill="none" stroke="#d6dffe" stroke-width="12" stroke-linecap="round"/><path d="M185 35H335M185 65H310M185 95H330" stroke="#9a86e7" stroke-width="5" stroke-linecap="round"/><text x="185" y="130" font-size="15" fill="#d9d9ff">CONTROL · BALANCE</text></svg></div>'+
- '<div class="practice-steps"><h3>How to move</h3><p>'+esc(m.cue)+'</p><p class="caption"><strong>Watch out for:</strong> '+esc(m.avoid)+'</p>'+(href?'<a href="'+href+'" target="_blank" rel="noopener noreferrer">View a demonstration ↗</a>':'<p class="caption">No external demonstration has been verified for this movement. Ask an adult to check form.</p>')+'</div>'+rows+
- '<p class="caption">Checking a set means you completed it. Uncheck to correct a mistake. Do not train through pain.</p>';
-}
+function workoutHTMLCard(){return '<section role="alert"><h2>Workout demonstration unavailable</h2><p>Independent exercise instruction is suspended until approved movement media is integrated.</p></section>';}
 function overlayHTML(){
  var mode=overlay,heading=mode==='lesson'?'LEARN / GAME IQ':mode==='drill'?'DRILLS / BALL LAB':'WORKOUT / MOVEMENT';
  var body=mode==='lesson'?lessonHTML():mode==='drill'?drillHTML():workoutHTMLCard();
  var footer='';
  if(mode==='lesson')footer='<button class="button" data-action="lesson-back" '+(phase===0?'disabled':'')+'>← Back</button><button class="primary" data-action="lesson-next">'+(phase===2?'Finish lesson':'Continue →')+'</button>';
  if(mode==='drill'){var t=trackById(drillTrack);footer='<button class="button" data-action="drill-move" data-step="-1" '+(drillIndex===0?'disabled':'')+'>← Previous</button><button class="primary" data-action="drill-move" data-step="1">'+(drillIndex===t.ids.length-1?'Finish':'Next drill →')+'</button>'}
- if(mode==='workout'){var w=workoutRecord();footer='<button class="button" data-action="workout-move" data-step="-1" '+(workoutIndex===0?'disabled':'')+'>← Previous</button><button class="primary" data-action="workout-move" data-step="1">'+(workoutIndex===w.items.length-1?'Finish / review':'Next movement →')+'</button>'}
+ if(mode==='workout')footer='<button class="button" data-action="close">Close</button>';
  return '<section class="overlay" role="dialog" aria-modal="true" aria-label="'+heading+'" id="activeOverlay"><div class="overlay-inner"><div class="overlay-head"><span class="phase">'+heading+'</span><button class="close" data-action="close" aria-label="Close card">×</button></div><div class="overlay-content">'+body+'</div><div class="overlay-footer">'+footer+'</div></div></section>';
 }
 function openLesson(id){if(!source.byId[id])return;lastActiveButton=document.activeElement;lessonId=id;phase=activateCore('lesson',id);frame=0;revealed=false;decisionDraft='';notesDraft='';overlay='lesson';render();focusClose()}
 function focusClose(){var close=root.querySelector('.close');if(close)close.focus()}
 function openDrill(id){lastActiveButton=document.activeElement;drillTrack=trackById(id).id;drillIndex=activateCore('drill',drillTrack);partner=false;overlay='drill';render();focusClose()}
-function openWorkout(mode){lastActiveButton=document.activeElement;var w=createWorkout(mode),cursor=isWorkoutDone(w)?0:activateCore('workout','v3-workout-'+w.date);workoutIndex=Math.max(cursor,Math.max(0,w.items.findIndex(function(name,i){return !slotsFor(w,i).every(function(k){return !!w.checks[k]})})));overlay='workout';render();focusClose()}
+function openWorkout(mode){overlay=null;page='workout';render();return}
 function close(){if(core&&coreSessionId){var s=core.getState().sessions[coreSessionId];if(s&&s.status==='in_progress'){saveCoreCursor(overlay==='lesson'?phase:overlay==='drill'?drillIndex:workoutIndex);core.transition(coreSessionId,'paused')}}coreSessionId=null;overlay=null;render();if(lastActiveButton&&lastActiveButton.isConnected)lastActiveButton.focus()}
 function nextLesson(){
  var r=progress(lessonId);
@@ -265,7 +259,7 @@ root.addEventListener('click',function(e){
  if(a==='lesson'){openLesson(b.dataset.id);return}
  if(a==='drill'){openDrill(b.dataset.id);return}
  if(a==='choose-workout'){openWorkout(b.dataset.mode);return}
- if(a==='start-workout'){openWorkout(workoutRecord().mode);return}
+ if(a==='start-workout'){openWorkout('blocked');return}
  if(a==='close'){close();return}
  if(a==='frame'){frame+=Number(b.dataset.step);render();return}
  if(a==='phase'){var p=Number(b.dataset.phase);if(p>phase){var record=progress(lessonId);if(phase===0)record.seen=record.seen||today();if(phase===1){var box=document.getElementById('decisionInput');record.decision=box?box.value:decisionDraft}persist()}phase=p;saveCoreCursor(phase);render();return}
@@ -274,7 +268,7 @@ root.addEventListener('click',function(e){
  if(a==='lesson-next'){nextLesson();return}
  if(a==='lesson-back'){if(phase>0){phase--;render()}return}
  if(a==='drill-move'){var length=trackById(drillTrack).ids.length;var n=drillIndex+Number(b.dataset.step);if(n>=length){if(drillRecord(drillTrack).done.length===length){completeCore('drill');close();page='finish';render()}else{drillIndex=Math.max(0,trackById(drillTrack).ids.findIndex(function(id){return drillRecord(drillTrack).done.indexOf(id)<0}));saveCoreCursor(drillIndex);render()}return}drillIndex=Math.max(0,n);saveCoreCursor(drillIndex);render();return}
- if(a==='workout-move'){var w=workoutRecord(),next=workoutIndex+Number(b.dataset.step);if(next>=w.items.length){if(isWorkoutDone(w)){w.finished=w.finished||new Date().toISOString();persist();completeCore('workout');close();page='finish';render()}else{workoutIndex=0;while(workoutIndex<w.items.length-1&&slotsFor(w,workoutIndex).every(function(k){return !!w.checks[k]}))workoutIndex++;render()}return}workoutIndex=Math.max(0,next);saveCoreCursor(workoutIndex);render();return}
+ if(a==='workout-move')return;
  if(a==='export'){
   var payload={schema:3,exported:new Date().toISOString(),unified:state,legacy:legacy,core:core?core.getState():null};
   var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
@@ -287,7 +281,7 @@ root.addEventListener('change',function(e){
  if(t.id==='formatSelect'){state.format[player]=t.value==='9'?'9':'11';persist();render();return}
  if(t.id==='appliedCheck'){var r=progress(lessonId);if(t.checked)r.applied=today();else delete r.applied;r.example=(document.getElementById('applicationInput')||{}).value||r.example||'';persist();render();return}
  if(t.id==='drillCheck'){var r2=drillRecord(drillTrack),id=trackById(drillTrack).ids[drillIndex];r2.done=r2.done.filter(function(x){return x!==id});if(t.checked)r2.done.push(id);persist();render();return}
- if(t.dataset.set){var w=workoutRecord();if(!w)return;if(t.checked)w.checks[t.dataset.set]=new Date().toISOString();else delete w.checks[t.dataset.set];if(isWorkoutDone(w))w.finished=w.finished||new Date().toISOString();else w.finished=null;persist();render();return}
+ if(t.dataset.set)return; // Disabled until an approved instructional adapter replaces legacy workouts.
  if(t.id==='importFile'&&t.files&&t.files[0]){var file=t.files[0];file.text().then(function(s){var obj=parse(s);if(!obj||obj.schema!==3||!obj.unified||obj.unified.schema!==3||!Array.isArray(obj.unified.names)||!obj.unified.lessons||!obj.unified.drills||!obj.unified.workouts){alert('This is not a Galaxy Training v3 backup. Nothing was changed.');return}if(obj.core&&(!window.GalaxyCore||obj.core.schemaVersion!==1||!Array.isArray(obj.core.profiles)||!obj.core.sessions||!Array.isArray(obj.core.events)||!obj.core.schedule)){alert('Core progress in this backup is invalid. Nothing was changed.');return}state=obj.unified;state.names=state.names.map(function(x){return String(x).slice(0,35)});while(state.format.length<state.names.length)state.format.push('11');while(state.level.length<state.names.length)state.level.push(0);if(obj.legacy){try{localStorage.setItem(LEGACY,JSON.stringify(obj.legacy));legacy=obj.legacy}catch(err){}}player=Math.max(0,Math.min(Number(state.active)||0,state.names.length-1));persist();if(obj.core){try{localStorage.setItem(window.GalaxyCore.storageKey,JSON.stringify(obj.core));core=window.GalaxyCore.createRuntime(localStorage,state);core.selectPlayer(corePlayer())}catch(err){alert('Core progress could not be restored. Existing v3 data was imported; check browser storage.')}}page='home';overlay=null;render();alert('Backup imported to this browser.')} ).catch(function(){alert('Unable to read this file. Nothing was changed.')});return}
 });
 root.addEventListener('input',function(e){if(e.target.id==='decisionInput'){decisionDraft=e.target.value;progress(lessonId).decision=decisionDraft;persist()}if(e.target.id==='applicationInput'){notesDraft=e.target.value;progress(lessonId).example=notesDraft;persist()}});

@@ -45,6 +45,18 @@
           (i.reps===undefined||nonempty(String(i.reps)));
       });
   }
+// A release record must be tied to the exact exercise and asset revision.
+// This verifies the required REVIEW RECORD exists; it does not substitute for human biomechanics assessment.
+var MOVEMENT_CHECKS=['jointAlignment','movementPath','rangeOfMotion','stability','equipmentContact','ageAppropriateness'];
+function isReviewedExerciseDemonstration(exercise){
+  if(!validateExercise(exercise)||!exercise.animation||exercise.animation.kind!=='animation')return false;
+  var media=exercise.animation,review=media.review;
+  return nonempty(media.assetVersion)&&isObject(review)&&review.status==='approved'&&
+    review.exerciseId===exercise.id&&review.assetId===media.assetId&&review.assetVersion===media.assetVersion&&
+    nonempty(review.reviewedBy)&&nonempty(review.reviewerQualification)&&
+    dateOnly(review.reviewedAt)&&isObject(review.checks)&&
+    MOVEMENT_CHECKS.every(function(key){return review.checks[key]===true});
+}
   function createRuntime(storage,legacy){
     if(!storage||typeof storage.getItem!=='function'||typeof storage.setItem!=='function')throw Error('A storage adapter with getItem and setItem is required');
     var saved=null,storageError=null;
@@ -200,5 +212,6 @@
   }
   return {schemaVersion:VERSION,storageKey:KEY,states:STATES.slice(),validTransitions:copy(NEXT),
     validateLesson:validateLesson,validateExercise:validateExercise,validateWorkout:validateWorkout,
+    isReviewedExerciseDemonstration:isReviewedExerciseDemonstration,
     createRuntime:createRuntime};
 });

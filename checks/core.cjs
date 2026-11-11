@@ -50,4 +50,16 @@ assert.ok(!Core.validateLesson({...lesson,media:[{kind:'video'}]}),'missing medi
 assert.ok(!Core.validateWorkout({...workout,items:[{exerciseId:'e1',sets:0}]}),'invalid set count rejected');
 assert.equal(JSON.parse(memory[Core.storageKey]).schemaVersion,1);
 assert.deepEqual(Core.createRuntime(store,legacy).profiles().slice(0,2).map(p=>p.id),[jay,james]);
+
+const reviewable={schemaVersion:1,id:'e1',title:'Test exercise',animation:{
+ assetId:'anim-1',kind:'animation',assetVersion:'rev-3',review:{
+ status:'approved',exerciseId:'e1',assetId:'anim-1',assetVersion:'rev-3',
+ reviewedBy:'coach-reviewer-id',reviewerQualification:'Youth strength and conditioning coach',
+ reviewedAt:'2026-11-11',checks:{jointAlignment:true,movementPath:true,rangeOfMotion:true,stability:true,equipmentContact:true,ageAppropriateness:true}
+}}};
+assert.equal(Core.isReviewedExerciseDemonstration(reviewable),true,'review record matches exact exercise and media revision');
+assert.equal(Core.isReviewedExerciseDemonstration(exercise),false,'unreviewed exercise is denied');
+assert.equal(Core.isReviewedExerciseDemonstration({...reviewable,animation:{...reviewable.animation,assetVersion:'rev-4'}}),false,'new media revision requires new review');
+assert.equal(Core.isReviewedExerciseDemonstration({...reviewable,animation:{...reviewable.animation,review:{...reviewable.animation.review,exerciseId:'another-exercise'}}}),false,'review cannot be transferred to another movement');
+assert.equal(Core.isReviewedExerciseDemonstration({...reviewable,animation:{...reviewable.animation,review:{...reviewable.animation.review,checks:{...reviewable.animation.review.checks,jointAlignment:false}}}}),false,'failed anatomy review cannot display');
 console.log('PASS core foundation: profiles, isolated persistence, lifecycle, resume, skip, recovery, recommendations, competency evidence and integration contracts.');
