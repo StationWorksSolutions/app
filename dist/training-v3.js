@@ -79,20 +79,54 @@ function workoutKey(){return player+'|'+today()}
 function workoutRecord(){return state.workouts[workoutKey()]||null}
 function statLine(){var wd=workoutRecord();var entries=Object.keys(state.drills).filter(function(k){return k.indexOf(player+'|')===0&&state.drills[k].done&&state.drills[k].done.length});return '<div class="row"><div class="stat"><strong>'+completeCount()+' / 36</strong> concepts tried</div><span class="chip">'+entries.length+' drill sessions logged</span><span class="chip">'+(wd?'Workout '+(isWorkoutDone(wd)?'complete':'saved'):'No workout started today')+'</span></div>'}
 function navHTML(){
- return '<header class="sitehead"><div class="topbar"><button class="brand" data-action="home">GALAXY <b>/ TRAINING</b></button><label class="player-wrap"><span>PLAYER</span><select aria-label="Choose player" id="playerSelect">'+state.names.map(function(n,i){return '<option value="'+i+'" '+(i===player?'selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select></label></div><nav class="topnav" aria-label="Primary"><button data-action="nav" data-path="learn" '+(page==='learn'?'aria-current="page"':'')+'>Learn</button><button data-action="nav" data-path="drills" '+(page==='drills'?'aria-current="page"':'')+'>Drills</button><button data-action="nav" data-path="workout" '+(page==='workout'?'aria-current="page"':'')+'>Workout</button></nav></header>';
+ return '<header class="sitehead"><div class="topbar"><button class="brand" data-action="home">GALAXY <b>/ TRAINING</b></button><label class="player-wrap"><span>PLAYER</span><select aria-label="Choose player" id="playerSelect">'+state.names.map(function(n,i){return '<option value="'+i+'" '+(i===player?'selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select></label></div></header>'+
+ '<nav class="topnav" aria-label="Primary">'+[['home','Today'],['learn','Learn'],['train','Train'],['progress','Progress']].map(function(a){var selected=page===a[0]||(a[0]==='train'&&(page==='drills'||page==='workout'));return '<button data-action="nav" data-path="'+a[0]+'" '+(selected?'aria-current="page"':'')+'>'+a[1]+'</button>'}).join('')+'</nav>';
+}
+
+function recommended(){
+ return core?core.recommend(corePlayer(),today(),source.lessons.map(function(l){return {id:l.id,title:l.title}})):
+  {kind:'new',contentId:source.lessons[0].id,label:'Start your lesson',reason:'Watch, practice and apply'};
 }
 function homeHTML(){
- var current=state.level[player]||0;var level=source.levels[current]||source.levels[0];
- return '<section class="intro"><p class="eyebrow">PLAYER DEVELOPMENT</p><h1>Build the player. Read the game.</h1><p class="lead">One place to understand the game, repeat useful skills, and move with purpose.</p></section>'+
- '<div class="home-grid">'+[
- ['learn','◎','Learn','Read the game. Predict a decision, see the movement, and try it.','36 Game IQ concepts'],
- ['drills','⚽','Drills','Ball work that builds on the concepts you learn. Solo or with a partner.','Practice with purpose'],
- ['workout','↗','Workout','Eight to ten clear movements, with sets and progress that saves.','Build movement quality']
- ].map(function(a){return '<button class="path-card" data-action="nav" data-path="'+a[0]+'"><span class="art" aria-hidden="true">'+a[1]+'</span><strong>'+a[2]+'</strong><span class="desc">'+a[3]+'</span><span class="go">'+a[4]+' →</span></button>'}).join('')+
- '</div><section class="panel"><div class="split"><div><p class="eyebrow">YOUR CURRENT LEVEL</p><h3>'+esc(level[0])+'</h3><p class="muted">'+esc(level[1])+'</p></div><button class="ghost" data-action="nav" data-path="learn">Continue learning →</button></div><div class="rule"></div>'+statLine()+'</section>'+
- '<details class="panel"><summary>Log a practice or game</summary><form id="logForm"><div class="option-row"><label class="toggle"><input type="radio" name="kind" value="Practice" checked> Practice</label><label class="toggle"><input type="radio" name="kind" value="Game"> Game</label></div><label class="field">One thing I noticed<textarea name="note" maxlength="400" placeholder="What did you see or try?"></textarea></label><p><button class="primary" type="submit">Save activity</button></p></form></details>'+
- '<div class="bottom-note">Profiles and progress are stored in this browser, not synced between devices. <button class="button tiny" data-action="settings">Settings & backup</button></div>';
+ var r=recommended(),l=source.byId[r.contentId],title=l?l.title:r.label,action='';
+ if(r.kind==='new'||r.kind==='review')action='<button class="primary next-action" data-action="lesson" data-id="'+esc(r.contentId)+'">'+(r.kind==='review'?'Review':'Start session')+' →</button>';
+ if(r.kind==='resume')action='<button class="primary next-action" data-action="resume-core" data-id="'+esc(r.sessionId)+'">Resume session →</button>';
+ if(r.kind==='scheduled')action='<button class="primary next-action" data-action="nav" data-path="log">Log activity →</button>';
+ return '<section class="journey"><p class="eyebrow">TODAY / '+esc(state.names[player])+'</p><h1>One clear next step.</h1>'+
+ '<div class="next-panel"><p class="eyebrow">'+esc(r.kind==='scheduled'?'TEAM ACTIVITY':r.kind==='recovery'?'RECOVERY':r.kind==='finished'?'FINISHED':'YOUR DEVELOPMENT FOCUS')+'</p>'+
+ '<h2>'+esc(title)+'</h2><p>'+esc(r.reason||'Watch, practice, apply.')+'</p>'+action+'</div>'+
+ '<p class="caption">'+(r.finishedForToday?'You are finished for today.':'One session at a time. You decide when to continue.')+'</p>'+
+ '<details class="journey-extra"><summary>Optional activities</summary><button data-action="nav" data-path="train">Browse training</button> <button data-action="nav" data-path="log">Log a match or practice</button> <button data-action="settings">Profiles and backup</button></details></section>';
 }
+function trainHTML(){
+ return '<section class="intro"><p class="eyebrow">TRAIN</p><h1>Practice with purpose.</h1><p class="lead">Choose a training type, or return to Today for your recommendation.</p></section>'+
+ '<div class="training-choices"><button class="listcard" data-action="nav" data-path="drills"><span class="meta">FIELD</span><h2>Soccer drills</h2><span>Ball work and decisions →</span></button>'+
+ '<button class="listcard" data-action="nav" data-path="workout"><span class="meta">PHYSICAL</span><h2>Workouts</h2><span>Strength and coordination →</span></button></div>';
+}
+function progressHTML(){
+ var prefix=player+'|',keys=Object.keys(state.lessons).filter(function(k){return k.indexOf(prefix)===0});
+ var seen=keys.filter(function(k){return !!state.lessons[k].seen}).length,applied=keys.filter(function(k){return !!state.lessons[k].applied}).length;
+ var drills=Object.keys(state.drills).filter(function(k){return k.indexOf(prefix)===0&&state.drills[k].done&&state.drills[k].done.length}).length;
+ var workouts=Object.keys(state.workouts).filter(function(k){return k.indexOf(prefix)===0&&isWorkoutDone(state.workouts[k])}).length;
+ var info=core?core.sessionSummary(corePlayer()):{awaitingMatch:0,readyForReview:0};
+ return '<section class="intro"><p class="eyebrow">PROGRESS</p><h1>Your development.</h1><p class="lead">Participation is not the same as demonstrated skill competency.</p></section>'+
+ '<div class="progress-grid">'+[[seen,'Concepts explored'],[applied,'Ideas practiced'],[drills,'Drill sessions'],[workouts,'Workouts completed']].map(function(x){return '<div><strong>'+x[0]+'</strong><span>'+x[1]+'</span></div>'}).join('')+'</div>'+
+ '<section class="panel"><h2>What comes next?</h2><p>'+info.awaitingMatch+' ideas awaiting match application · '+info.readyForReview+' ready for review</p>'+
+ '<p class="caption">A practice checkbox does not award mastery.</p><button class="button" data-action="nav" data-path="log">Record field application</button></section>';
+}
+function logHTML(){
+ return '<section class="intro"><p class="eyebrow">FIELD NOTES</p><h1>Log activity.</h1></section>'+
+ '<form id="logForm" class="panel"><label class="field">Activity<select name="kind"><option>Practice</option><option>Game</option><option>Futsal</option></select></label>'+
+ '<label class="field">One thing you noticed<textarea name="note" maxlength="400"></textarea></label>'+
+ '<label class="toggle"><input type="checkbox" name="applied"> I tried an idea from training</label><button class="primary">Save activity</button></form>';
+}
+function finishHTML(){
+ var next=recommended();
+ return '<section class="journey"><p class="eyebrow">SESSION COMPLETE</p><h1>Progress recorded.</h1><div class="next-panel"><h2>Finished this session.</h2>'+
+ '<p>Your activity was recorded. Match application and competency are separate.</p><p>'+esc(next.finishedForToday?'Training is finished for today.':'Next: '+next.label)+'</p>'+
+ '<button class="primary next-action" data-action="nav" data-path="home">Back to Today →</button></div></section>';
+}
+
 function learnHTML(){
  var n=Math.max(0,Math.min(5,Number(state.level[player])||0)),level=source.levels[n];
  return '<section class="intro"><p class="eyebrow">LEARN / GAME IQ</p><h1>Think before you play.</h1><p class="lead">36 situations across six levels. Each card asks you to notice, choose, and apply an idea. Lessons are always open.</p></section>'+
@@ -131,7 +165,7 @@ function settingsHTML(){
  '<section class="panel"><h3>Saved activity</h3>'+statLine()+'<p class="caption">Older sessions, if any, are preserved under their original browser key and included in exports, not silently counted as new sessions.</p></section>';
 }
 function render(){
- root.innerHTML=navHTML()+'<main class="shell">'+(page==='home'?homeHTML():page==='learn'?learnHTML():page==='drills'?drillsHTML():page==='workout'?workoutHTML():settingsHTML())+'</main>'+(overlay?overlayHTML():'');
+ root.innerHTML=navHTML()+'<main class="shell">'+(page==='home'?homeHTML():page==='learn'?learnHTML():page==='train'?trainHTML():page==='progress'?progressHTML():page==='log'?logHTML():page==='finish'?finishHTML():page==='drills'?drillsHTML():page==='workout'?workoutHTML():settingsHTML())+'</main>'+(overlay?overlayHTML():'');
  document.body.style.overflow=overlay?'hidden':'';
  if(overlay==='workout'&&source.exerciseGraphic&&source.liftArt){var w=workoutRecord(),name=w&&w.items[workoutIndex],art=root.querySelector('.cardart');if(art&&source.liftArt[name]){art.innerHTML=source.exerciseGraphic(name);art.setAttribute('aria-label',name+' movement illustration')}}
 }
