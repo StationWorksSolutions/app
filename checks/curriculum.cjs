@@ -67,4 +67,42 @@ assert.deepEqual([p.exposed,p.understood,p.practiced,p.matchApplied,p.independen
 assert.equal(curriculum.progressFromEvents(events,'james','GI-001','2026-11-14').exposed,false);
 assert.equal(curriculum.progressFromEvents([...events,{playerId:'jay',contentId:'GI-001',type:'competency_verified',assessment:{reviewerId:'coach-1',evidence:'Repeated in new scenario'}}],'jay','GI-001','2026-11-14').independentlyVerified,true);
 assert.equal(curriculum.legacyPolicy().automaticMigration,false);
+
+const vm=require('node:vm');
+const files=['curriculum-catalog.js','curriculum-preview.js'];
+const sandbox={window:{},console};
+for(const f of files){const js=fs.readFileSync('dist/'+f,'utf8');new vm.Script(js,{filename:f});vm.runInNewContext(js,sandbox,{filename:f})}
+const full=sandbox.window.GalaxyCurriculumCatalog;
+const experience=sandbox.window.GalaxyCurriculumExperience;
+assert.equal(full.length,250,'the actual 250-record architecture catalog is loaded');
+assert.equal(new Set(full.map(l=>l.id)).size,250);
+assert.equal(full.reduce((n,l)=>n+l.prerequisites.length,0),306);
+assert.deepEqual(curriculum.validateCatalog(full),[]);
+const counts={GI:45,TM:40,AT:35,DF:30,PI:35,TT:30,TR:20,MA:15};
+for(const key of Object.keys(counts)){
+ assert.equal(full.filter(l=>l.domainCode===key).length,counts[key],key+' allocation');
+ assert.deepEqual(new Set(full.filter(l=>l.domainCode===key).map(l=>l.level)),
+   new Set(['beginner','developing','advanced','mastery']),key+' pathway levels');
+}
+assert.deepEqual(curriculum.publishedLessons(full,{}),[],'250 drafts cannot be released automatically');
+assert.ok(experience.roadmapHTML('', 'all', false).includes('250 sequenced learning objectives'));
+assert.ok(experience.roadmapHTML('press', 'TR', true).includes('curriculum-result'));
+assert.ok(experience.roadmapHTML('<script>', 'all', true).includes('&lt;script&gt;'),'search term escaped');
+for(const id of ['GI-001','TM-005','TM-006']){
+ const source=full.find(l=>l.id===id), authored=experience.pilot[id];
+ assert.equal(authored.title,source.title,'pilot title aligns with full catalog');
+ assert.equal(authored.apply.length>10,true);
+ assert.equal(authored.frames.length,3);
+ for(const phase of [0,1,2])assert.ok(experience.lessonHTML(id,phase,0,'0',false).includes(source.title));
+ const watch=experience.lessonHTML(id,0,1,'0',true);
+ assert.ok(watch.includes('viewBox')&&watch.includes('Compare')===false&&watch.includes('COACH REVIEW PENDING'));
+ assert.ok(experience.lessonHTML(id,1,0,'',false).includes('FIELD DRILL'));
+ assert.ok(experience.lessonHTML(id,2,0,'',false).includes('MATCH CHALLENGE'));
+}
+assert.ok(html.indexOf('curriculum-catalog.js')<html.indexOf('curriculum-preview.js'));
+assert.ok(html.indexOf('curriculum-preview.js')<html.indexOf('training-v3.js'));
+assert.ok(html.includes('curriculum-preview.css'));
+assert.match(fs.readFileSync('dist/training-v3.js','utf8'),/curriculum-open/);
+assert.match(fs.readFileSync('dist/training-v3.js','utf8'),/curriculumSearchForm/);
+
 console.log('PASS curriculum: dependency-closed pilot, publication invariants, media/drill/reviews, core adapter, progress separation, formation safety, legacy hold.');
