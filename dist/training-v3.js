@@ -120,6 +120,7 @@ function settingsHTML(){
 function render(){
  root.innerHTML=navHTML()+'<main class="shell">'+(page==='home'?homeHTML():page==='learn'?learnHTML():page==='drills'?drillsHTML():page==='workout'?workoutHTML():settingsHTML())+'</main>'+(overlay?overlayHTML():'');
  document.body.style.overflow=overlay?'hidden':'';
+ if(overlay==='workout'&&source.exerciseGraphic&&source.liftArt){var w=workoutRecord(),name=w&&w.items[workoutIndex],art=root.querySelector('.cardart');if(art&&source.liftArt[name]){art.innerHTML=source.exerciseGraphic(name);art.setAttribute('aria-label',name+' movement illustration')}}
 }
 function diagram(l){
  var m=source.plays[l.id];if(!m)return '<div class="notice">Use the question and coached explanation for this concept.</div>';
