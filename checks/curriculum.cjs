@@ -1,9 +1,9 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const html=fs.readFileSync('dist/index.html','utf8');
-assert.match(html,/curriculum-gate\\.js/);
-assert.match(html,/curriculum-pilot\\.js/);
-assert.match(html,/training-v3\\.js/,'existing app entry preserved');
+assert.ok(html.includes('curriculum-gate.js'));
+assert.ok(html.includes('curriculum-pilot.js'));
+assert.ok(html.includes('training-v3.js'),'legacy app entry preserved');
 const curriculum=require('../dist/curriculum-gate.js');
 const pilot=require('../dist/curriculum-pilot.js');
 const Core=require('../dist/core-foundation.js');
